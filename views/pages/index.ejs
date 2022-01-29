@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- <meta charset="utf-8" /> -->
+    <!-- <meta name="viewport" content="width=device-width,initial-scale=1" /> -->
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css"
+    />
+    <title>Essentia.js</title>
+    <link rel="icon" type="image/x-icon" href="https://i.ibb.co/FJcW4XD/unitn-logo-black-A-scelta.png">
+  </head>
+
+  <body style="background-color:  #000000!important;">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia-wasm.web.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia.js-extractor.js"></script>
+    <script src="https://unpkg.com/essentia.js@0.1.3/dist/essentia.js-core.js"></script>>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+    <script src="https://unpkg.com/wavesurfer.js"></script>
+
+
+    <!-- MENU -->
+    <div class="ui inverted menu" style="margin: 0px;">
+      <div class="container">
+        <div class="left item" style="position:unset;">
+          <h1 class="ui header white-text" style="color: white; margin-inline: 30px;">
+            Logo placeholder
+          </h1>
+        </div>
+      </div>
+      
+
+      <div class="left item" style="position: unset;">
+        <a href="https://www.disi.unitn.it/"><img height="38px" style="margin-right: 20px;" src="https://i.ibb.co/FJcW4XD/unitn-logo-black-A-scelta.png"/></a>
+        <a href="https://www.cimil.disi.unitn.it/"><img height="36px" src="https://www.cimil.disi.unitn.it/wp-content/uploads/2021/05/logo_CIMIL.png"/></a>
+      </div>
+
+      <!-- YT LINK -->
+      <div class="container">
+        <div class="right item" style="position:unset;">Enter a YouTube URL:</div>
+        <div class="right item"  style="margin-right: 30px; position: unset;">
+          <div class="ui inverted action input">
+            <input type="url" id="input_yt_url"
+            placeholder="https://www.youtube.com/watch?v=example"
+            style="width: 400px;"></input>
+            <button class="ui button" id="load_audio_btn">Load audio</button>
+          </div>
+        </div>
+      </div>      
+    </div> <!-- END MENU -->
+
+    <!-- PAGE BODY -->
+    <div class="ui grid " style="margin: 30px">
+
+      <!-- LEFT RAIL -->
+      <div class="ui three wide column">
+        <p style="color: grey; margin-bottom:-6px; margin-left:-10px;"><small>Title:</small></p>
+        <h2 style="margin-top:0;"><a id="vidTitleHeader"; target="_blank"; style="color:white">none</a></h2>
+        <p style="color: grey; margin-bottom:-3px; margin-left:-10px;"><small>Channel:</small></p>
+        <h3 style="margin-top:0;"><a id="vidAuthorHeader"; target="_blank"; style="color:white">none</a></h3>
+        <p style="color: grey; margin-top: 10px; margin-bottom:-3px; margin-left:-10px;"><small>BPM:</small></p>
+        <h3 id="bpmHeader"; style="color: white; margin-top: 0;">none</h3>
+        <p style="color: grey; margin-top: 10px; margin-bottom:-3px; margin-left:-10px;"><small>Key:</small></p>
+        <h3 id="keyHeader"; style="color: white; margin-top: 0;">none</h3>
+      </div>
+
+      <!-- RIGHT BODY -->
+      <div class="ui thirteen wide column">
+        <div class="ui header centered">
+
+          <!-- local saved sessions -->
+          <div class="ui inverted segment" id="storageSegment" style="display: none;">
+            <div class="ui inverted accordion">
+              <div class="title active">
+                <i class="dropdown icon"></i>
+                Previously analized songs:
+                <div id="clear_storage_btn" class="ui tiny button" style="position: absolute; right: 40px;">Clear storage</div>
+              </div>
+              
+              <div class="content active">
+                <h4 id="storageSegmentContent" style="display: block !important;"></h4>
+              </div>
+            </div>
+            
+          </div>
+
+          <!-- CHORDS TO KNOW BEFORE STARTING -->
+          <div class="ui inverted segment" id="chordsSetSegment" style="display:none;">
+            <div class="ui inverted accordion">
+              <div class="title active">
+                <i class="dropdown icon"></i>
+                Which chords do you need to know?
+              </div>
+              <div class="content active">
+                <h2 id="chordsSet" style="display: block !important;"></h2>
+              </div>
+            </div>
+          </div>
+
+          <div id="chordsDisplay">
+            <h3 
+              id="previousChordHeader";
+              style="color: rgb(170, 170, 170); display: inline-block;">
+            </h3>
+            <h1 
+              id="currentChordHeader";
+              style="color: white; display: inline-block; width: 100px;">
+            </h1>
+            <h3 
+              id="nextChordHeader";
+              style="color: rgb(170, 170, 170); display: inline-block;">
+            </h3>
+          </div>
+
+          <!-- PLAYER BLOCK -->
+          <div class="audioPlayer">
+
+            <h4 id="emptyPlayer" style="color: grey;">The player is empty. Please enter a YouTube URL to load the audio.</h4>
+
+            <div id="waveform" style="height:200px; margin-inline: 70px; position: relative;">
+              <canvas id="chordsCanva" style="width:100%; height:100%; position:absolute; top:0px; left:0px;"></canvas>
+            </div>
+
+            <div class="timecode" style="color: white;">
+              <h3 id=currentTime style="display:inline; position:absolute; left:20px">00:00</h3>
+              <h3 id=totalDuration style="display:inline; position:absolute; right:20px">00:00</h3>
+            </div>
+
+            <!-- <div class="timecode" style="color: white; margin-bottom: 20px;">
+              <span id="currentTime">00:00</span>
+              <span>/</span>
+              <span id="totalDuration">00:00</span>
+            </div> -->
+
+            <div class="controls">
+              <div id="stop_btn"
+                class="large ui inverted icon primary button">
+                <i class="step backward icon"
+                alt="Stop Button"></i>
+              </div>
+
+              <div id="play_pause_btn" 
+                class="massive ui inverted icon primary button">
+                <i class="play icon" id="play"
+                alt="Play Button"></i>
+                <i class="pause icon" id="pause" 
+                style="display: none" 
+                alt="Pause Button"></i>
+              </div>
+              
+              <div id="volume_btn"
+                class="large ui inverted icon primary button">
+                <i class="volume up icon" id="volON"
+                alt="Mute Button"></i>
+                <i class="volume off icon" id="volOFF" 
+                style="display: none" 
+                alt="Unmute Button"></i>
+              </div>
+
+              <div class="ui inverted popup">
+                <input class="volume-slider"
+                  id="volumeSlider"
+                  type="range"
+                  name="volume-slider"
+                  min="0"
+                  max="100"
+                  value="50"/>
+              </div>
+  	          
+            </div> <!-- END OF AUDIO CONTROLS -->
+          </div> <!-- END OF PLAYER -->
+
+          <!-- FOOTER -->
+          <div class="ui header centered">
+            <div class="footer" style="margin-top: 70px;">
+              <p2 style="color: white; font-size:small; vertical-align:9px; margin-right:-5px;">Powered &nbsp;&nbsp;by</p2>
+              <a href="https://mtg.github.io/essentia.js">
+                <img src="https://github.com/MTG/essentia.js/blob/master/src/assets/img/essentiajsbanner.png?raw=true"
+                  style="height: 27px;"/>
+              </a>
+            </div>
+          </div>
+
+        </div> <!-- END OF CENTERED RIGHT BODY -->
+      </div> <!-- END OF RIGHT BODY -->
+
+    </div> <!-- END OF PAGE BODY -->
+
+    <!-- LOADERS -->
+    <div class="ui inactive dimmer" id="audioLoader">
+      <div class="ui big inactive inverted text loader">Fetching the audio track...</div>
+    </div>
+
+    <div class="ui inactive dimmer" id="essentiaLoader">
+      <div class="ui big inactive inverted text loader">Analyzing audio track, please wait...</div>
+    </div>
+
+      <!-- <div class="ui diverder" style="height: 30px;"></div> -->
+    <script src="./utils.js"></script>
+    <script src="./mainScript.js"></script>
+    <script src="./player.js"></script>
+    <script src="./canvas.js"></script>
+    <script src="./storage.js"></script>
+
+
+  </body>
+</html>
