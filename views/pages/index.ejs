@@ -34,8 +34,8 @@
       
 
       <div class="left item" style="position: unset;">
-        <a href="https://www.disi.unitn.it/"><img height="38px" style="margin-right: 20px;" src="https://i.ibb.co/FJcW4XD/unitn-logo-black-A-scelta.png"/></a>
-        <a href="https://www.cimil.disi.unitn.it/"><img height="36px" src="https://www.cimil.disi.unitn.it/wp-content/uploads/2021/05/logo_CIMIL.png"/></a>
+        <a href="https://www.disi.unitn.it/" target="_blank"><img height="38px" style="margin-right: 20px;" src="https://i.ibb.co/FJcW4XD/unitn-logo-black-A-scelta.png"/></a>
+        <a href="https://www.cimil.disi.unitn.it/" target="_blank"><img height="36px" src="https://www.cimil.disi.unitn.it/wp-content/uploads/2021/05/logo_CIMIL.png"/></a>
       </div>
 
       <!-- YT LINK -->
@@ -71,6 +71,24 @@
       <div class="ui thirteen wide column">
         <div class="ui header centered">
 
+          <!-- SAMPLE RATE ERROR -->
+          <div class="ui inverted error tiny message" id="sampleRateMsg" style="display: none;">
+            <i class="close icon" id="sample_rate_btn"></i>
+            <div class="header">
+              ERROR: the audio sample rate should be set to 44100Hz.
+            </div>
+            <p style="text-align: left;">Some functions of this app require a sample rate of 44100Hz to be set on your device. 
+              Otherwise, functions like chord recognition and BPM extraction may not work properly. 
+              Unfortunately, we cannot change this setting for you.</p>
+            <ul class="list">
+              <li>If your device is running Windows, please follow <a href="https://samsontech.zendesk.com/hc/en-us/articles/1260802890449-Fix-Windows-10-sample-rate-mismatch-causing-garbled-audio" target="_blank">
+                this guide</a> to change the audio sample rate of both your Speaker and Microphone to 44100Hz.</li>
+              <li>If your device is a Mac, please follow <a href="https://smallbusiness.chron.com/macbook-pro-change-sample-rate-49804.html" target="_blank">
+                this guide</a> instead to change the audio sample rate of both your Speaker and Microphone to 44100Hz.</li>
+            </ul>
+            <p style="text-align: left;">Please reload the page to apply changes.</p>
+          </div>
+
           <!-- local saved sessions -->
           <div class="ui inverted segment" id="storageSegment" style="display: none;">
             <div class="ui inverted accordion">
@@ -79,12 +97,10 @@
                 Previously analized songs:
                 <div id="clear_storage_btn" class="ui tiny button" style="position: absolute; right: 40px;">Clear storage</div>
               </div>
-              
               <div class="content active">
-                <h4 id="storageSegmentContent" style="display: block !important;"></h4>
+                <ul class="ui link list" id="sessionsList"></ul>
               </div>
             </div>
-            
           </div>
 
           <!-- CHORDS TO KNOW BEFORE STARTING -->
@@ -177,7 +193,7 @@
           <div class="ui header centered">
             <div class="footer" style="margin-top: 70px;">
               <p2 style="color: white; font-size:small; vertical-align:9px; margin-right:-5px;">Powered &nbsp;&nbsp;by</p2>
-              <a href="https://mtg.github.io/essentia.js">
+              <a href="https://mtg.github.io/essentia.js" target="_blank">
                 <img src="https://github.com/MTG/essentia.js/blob/master/src/assets/img/essentiajsbanner.png?raw=true"
                   style="height: 27px;"/>
               </a>
@@ -190,12 +206,20 @@
     </div> <!-- END OF PAGE BODY -->
 
     <!-- LOADERS -->
-    <div class="ui inactive dimmer" id="audioLoader">
+    <div class="ui inactive dimmer" id="loader">
       <div class="ui big inactive inverted text loader">Fetching the audio track...</div>
     </div>
 
-    <div class="ui inactive dimmer" id="essentiaLoader">
-      <div class="ui big inactive inverted text loader">Analyzing audio track, please wait...</div>
+     <!-- Open session? MODAL -->
+     <div id="wrapper">
+      <div class="ui dimmable basic modal" style="margin-top: 15%;">
+        <div class="ui icon header"><i class="upload icon"></i>Do you want to open this song?</div>
+        <p id="modalName" style="text-align: center;"></p>
+        <div class="actions">
+          <div class="ui red basic cancel inverted button"><i class="remove icon"></i>No</div>
+          <div class="ui green ok inverted button" id="load_session_btn"><i class="checkmark icon"></i>Yes</div>
+        </div>
+      </div>
     </div>
 
       <!-- <div class="ui diverder" style="height: 30px;"></div> -->

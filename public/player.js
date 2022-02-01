@@ -27,9 +27,18 @@ var wavesurfer = WaveSurfer.create({
 
 // Functions
 /**
+ * Wrapper for wavesurfer.load()
+ */
+const loadWaveform = () => {
+  $('.text.loader').text('Fetching the audio track...');
+  $('#loader').dimmer('show');
+  wavesurfer.load(session.audioURL);
+}
+
+/**
  * Toggle play button
  */
- const togglePlay = () => {
+const togglePlay = () => {
   wavesurfer.playPause()
   const isPlaying = wavesurfer.isPlaying()
   if (isPlaying) {
@@ -44,7 +53,7 @@ var wavesurfer = WaveSurfer.create({
 /**
  * Stop playing
  */
- const stop = () => {
+const stop = () => {
   wavesurfer.stop();
   $("#play").show();
   $("#pause").hide();
@@ -101,9 +110,13 @@ wavesurfer.on("ready", () => {
   // Set audio track total duration
   const duration = wavesurfer.getDuration()
   totalDuration.innerHTML = formatTimecode(duration)
-  $("#audioLoader").dimmer('hide');
-  $("#emptyPlayer").hide();
-  featureExtractor();
+  if (newSession) {
+    featureExtractor();
+  } else {
+    $("#loader").dimmer('hide');
+    playPause();
+  }
+  $("#emptyPlayer").fadeOut();
 })
 
 // not working, see github issues:

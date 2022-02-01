@@ -2,8 +2,6 @@
 // global var to load essentia.js core instance
 let essentiaExtractor;
 let isEssentiaInstance = false;
-// global var for web audio API AudioContext
-// let audioCtx;
 // buffer size microphone stream (bufferSize is high in order to make PitchYinProbabilistic algo to work)
 // let bufferSize = 8192;
 // let hopSize = 2048;
@@ -12,22 +10,15 @@ let hopSize = 512;
 let chordConfidence = 0.75;
 
 let session = {};
+let newSession;
 let audioData;
 
 // let filePicker = document.getElementById('filePicker')
-// let player = document.getElementById("audioPlayer");
 let chordsCursor = 0;
 let chordsArray = [];
 let ticksArray = [];
 
 let scriptNode;
-
-// try {
-//   const AudioContext = window.AudioContext || window.webkitAudioContext;
-//   audioCtx = new AudioContext();
-// } catch (e) {
-//   throw "Could not instantiate AudioContext: " + e.message;
-// }
 
 /*
 const computeChords = function(audioVectorBuffer) {
@@ -103,12 +94,15 @@ function getVideoInfo(videoURL) {
         session.title = videoINFO.title;
         session.channel = videoINFO.author_name;
         session.channelURL = videoINFO.author_url;
-        // print info
-        $('#vidTitleHeader').text(videoINFO.title);
-        $('#vidTitleHeader').attr('href', videoURL);
-        $('#vidAuthorHeader').text(videoINFO.author_name);
-        $('#vidAuthorHeader').attr('href', videoINFO.author_url);
+        printVideoInfo();
   });
+}
+
+function printVideoInfo(){
+  $('#vidTitleHeader').text(session.title);
+  $('#vidTitleHeader').attr('href', session.videoURL);
+  $('#vidAuthorHeader').text(session.channel);
+  $('#vidAuthorHeader').attr('href', session.channelURL);
 }
 
 
@@ -119,11 +113,9 @@ async function fetchYoutubeAudio() {
     session.videoURL = videoURL;
     getVideoInfo(videoURL);
 
-    $("#audioLoader").dimmer('show');
-    console.log("initializing audio stream");
     session.audioURL = "http://" + window.location.host + "/youtube/?link=" + videoURL;
     console.log(session);
-    wavesurfer.load(session.audioURL);
+    loadWaveform();
   } else {
     Swal.fire({
       icon: 'error',
@@ -141,43 +133,25 @@ async function fetchYoutubeAudio() {
     // }
 }
 
-// callback function which compute Chords of input session.audioURL
+// callback function which compute Chords of the audio
 async function featureExtractor() {
-  $("#essentiaLoader").dimmer('show');
+  $('.text.loader').text('Analyzing audio track, please wait...')
 
   // load audio file from an url
   audioData = await essentiaExtractor.getAudioChannelDataFromURL(session.audioURL, audioCtx, 0);
-  let audioBuffer = await essentiaExtractor.getAudioBufferFromURL(session.audioURL, audioCtx);
   let signal = essentiaExtractor.arrayToVector(audioData);
-  // let signal = essentiaExtractor.arrayToVector(essentiaExtractor.audioBufferToMonoSignal(audioBuffer));
-
-  // let audioVectorBuffer = essentiaExtractor.arrayToVector(audioData);
-  let hpcpPool = new essentiaExtractor.module.VectorVectorFloat();
 
   session.bpm = parseInt(essentiaExtractor.PercivalBpmEstimator(signal).bpm);
-  $("#bpmHeader").text(session.bpm + " bpm");
 
   let tonal = essentiaExtractor.TonalExtractor(signal);
   session.key = tonal.key_key + " " + tonal.key_scale;
-  $("#keyHeader").text(session.key);
 
   let ticks = await essentiaExtractor.BeatTrackerMultiFeature(signal).ticks;
   // let ticks = await essentiaExtractor.BeatTrackerDegara(signal).ticks;
 
-  let tmp;
-  let revTicks = [];
-  for(var i=0; i<ticks.size(); ++i){
-    tmp = ticks.get(i)*0.92;
-    revTicks.push(tmp);
-    console.log(formatTimecode(ticks.get(i)) + " -> " + formatTimecode(tmp));
-  }
-
-  ticks = essentiaExtractor.arrayToVector(revTicks);
-
-
+  let hpcpPool = new essentiaExtractor.module.VectorVectorFloat();
   // Generate overlapping frames with given frameSize and hopSize
   let audioFrames = essentiaExtractor.FrameGenerator(audioData, bufferSize, hopSize);
-
   for (var i=0; i<audioFrames.size(); i++) {
     hpcpPool.push_back(essentiaExtractor.arrayToVector(essentiaExtractor.hpcpExtractor(essentiaExtractor.vectorToArray(audioFrames.get(i)))));
   }
@@ -206,6 +180,7 @@ async function featureExtractor() {
       chordsArray.push(detChords.chords.get(i));
       ticksArray.push(ticks.get(i));
     }
+    printFeatures();
     
   }
 
@@ -216,12 +191,17 @@ async function featureExtractor() {
   session.chordsSet = chordsString.slice(0, -2);
 
   $('#chordsSet').text(session.chordsSet);
-  $('#chordsSetSegment').show();
-  $('#essentiaLoader').dimmer('hide');
+  $('#chordsSetSegment').fadeIn();
+  $('#loader').dimmer('hide');
   updateChords();
   printChordsLines();
   togglePlay();
   saveSession();
+}
+
+function printFeatures(){
+  $("#keyHeader").text(session.key);
+  $("#bpmHeader").text(session.bpm + " bpm");
 }
 
 //todo: try to move this away
@@ -255,6 +235,13 @@ function updateChords() {
 // DOCUMENT READY
 $(function () {
   // loads the WASM backend and runs the feature extraction
+
+  if(audioCtx.sampleRate != 44100) {
+    $('#sampleRateMsg').fadeIn();
+  } else {
+    $('#sampleRateMsg').fadeOut();
+  }
+
   EssentiaWASM().then(function (essentiaWasmModule) {
     if (!isEssentiaInstance) {
       essentiaExtractor = new EssentiaExtractor(essentiaWasmModule);
@@ -269,9 +256,6 @@ $(function () {
       isEssentiaInstance = true;
     }
   });
-
-  $('.ui.accordion').accordion(); // enable collapsing text
-  $('#volume_btn').popup({ position: 'right center', hoverable: true });
 });
 
 // buttons listener
@@ -279,8 +263,18 @@ $('#load_audio_btn').on('click', function(){
   stop();
   clearCanvas();
   $("#chordsSet").text("");
+  newSession = true;
   fetchYoutubeAudio();
 });
+
+$('.ui.accordion').accordion();
+
+$('.message .close').on('click', function() {
+  $(this).closest('.message').fadeOut();
+});
+
+$('#volume_btn').popup({ position: 'right center', hoverable: true });
+
 
 // keyboard Enter event listener for link input
 $('#input_yt_url').on('keydown', function(e) {
