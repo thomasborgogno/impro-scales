@@ -1,6 +1,4 @@
-const playPauseBtn = document.querySelector("#play_pause_btn")
-const stopBtn = document.querySelector("#stop_btn")
-const volumeBtn = document.querySelector("#volume_btn");
+let volumeSlider = document.getElementById("volume_slider")
 const playerDiv = document.querySelector("#player")
 
 let audioCtx
@@ -15,6 +13,7 @@ try {
 var wavesurfer = WaveSurfer.create({
   audioContext: audioCtx,
   container: '#waveform',
+  // fillParent: true,
   responsive: true,
   waveColor: 'grey',
   progressColor: '#2B6FAC',
@@ -32,7 +31,7 @@ var wavesurfer = WaveSurfer.create({
 const loadWaveform = () => {
   $('.text.loader').text('Fetching the audio track...');
   $('#loader').dimmer('show');
-  wavesurfer.load(session.audioURL);
+  wavesurfer.load(session.audioURL); 
 }
 
 /**
@@ -44,12 +43,19 @@ const togglePlay = () => {
   if (isPlaying) {
     $("#play").hide();
     $("#pause").show();
-    cursorStream();
+    // cursorStream();
   } else {
     $("#play").show();
     $("#pause").hide();
   }
 }
+// /**
+//  * Toggle mic play button
+//  */
+// const toggleMic = () => {
+
+//   togglePlay();
+// }
 /**
  * Stop playing
  */
@@ -94,17 +100,38 @@ const toggleMute = () => {
     volumeSlider.disabled = false
   }
 }
+
+/**
+ * Updates chords and the timecode on the main page (called on seek and on audioProcess)
+ */
+const seekChordsTime = () => {
+  const time = wavesurfer.getCurrentTime()
+  currentTime.innerHTML = formatTimecode(time)
+
+  while(time > ticksArray[chordsCursor + 1]) {
+    ++chordsCursor;
+    updateChords();
+  }
+  if(chordsCursor > 0 && time < ticksArray[chordsCursor]) {
+    chordsCursor = 0;
+    updateChords();
+  }
+}
+
 // --------------------------------------------------------- //
 
 // Javascript Event listeners
-playPauseBtn.addEventListener("click", togglePlay)
-stopBtn.addEventListener("click", stop)
-volumeBtn.addEventListener("click", toggleMute)
+$('#play_pause_btn').on('click', togglePlay)
+$('#stop_btn').on('click', stop)
+$('#volume_btn').on('click', toggleMute)
 volumeSlider.addEventListener("input", handleVolumeChange)
+
+$('#play_mic_btn').popup({ on:'hover', delay:{show:500,hide:0} })
+
 // --------------------------------------------------------- //
 
 // Wavesurfer event listeners
-wavesurfer.on("ready", () => {
+wavesurfer.on('ready', () => {
   // Set wavesurfer volume
   wavesurfer.setVolume(volumeSlider.value / 100)
   // Set audio track total duration
@@ -114,7 +141,7 @@ wavesurfer.on("ready", () => {
     featureExtractor();
   } else {
     $("#loader").dimmer('hide');
-    playPause();
+    togglePlay();
   }
   $("#emptyPlayer").fadeOut();
 })
@@ -123,34 +150,59 @@ wavesurfer.on("ready", () => {
 // wavesurfer.on('loading', function(perc) {})
 
 // Sets the timecode current timestamp as audio plays
-wavesurfer.on("audioprocess", () => {
-  const time = wavesurfer.getCurrentTime()
-  currentTime.innerHTML = formatTimecode(time)
+wavesurfer.on('audioprocess', () => {
+  seekChordsTime();
+})
+
+wavesurfer.on('seek', () => {
+  seekChordsTime();
 })
 
 // Resets the play button icon after audio ends
-wavesurfer.on("finish", () => {
+wavesurfer.on('finish', () => {
   $("#play").show();
   $("#pause").hide();
+})
+
+wavesurfer.on('error', (e) => {
+  console.log(e);
+  $('#loader').dimmer('hide');
+  Swal.fire({
+    icon: 'error',
+    title: 'Error while fetching the audio: ' + e,
+    text: 'Please check your connection, try again or try with another link.'
+  })  
 })
 
 
 // keyboard event listener
 $(document).on('keydown', function(e) {
-  if(wavesurfer.isReady){
-    var handled = false;
-    if (e.key === ' ' || e.key === 'Spacebar') {
-      handled = true;
-      togglePlay();
-    } else if (e.key === 'ArrowLeft') {
-      handled = true;
-      wavesurfer.skipBackward();
-    } else if (e.key === 'ArrowRight') {
-      handled = true;
-      wavesurfer.skipForward();
-    }
-    if (handled) {
-      e.preventDefault();
+
+  // finding the element on which the event was fired:
+  source = e.target,
+
+  // an Array of element-types upon which the function should not fire
+  exclude = ['input', 'textarea'];
+
+  // finding the element-type (tagName) of the element upon which the event was fired, converting it to a lower-case string and then looking in the Array
+  // of excluded elements to see if the element is held within (-1 indicates the string was not found within the Array):
+  if (exclude.indexOf(source.tagName.toLowerCase()) === -1) {
+    
+    if(wavesurfer.isReady){
+      var handled = false;
+      if (e.key === ' ' || e.key === 'Spacebar') {
+        handled = true;
+        togglePlay();
+      } else if (e.key === 'ArrowLeft') {
+        handled = true;
+        wavesurfer.skipBackward();
+      } else if (e.key === 'ArrowRight') {
+        handled = true;
+        wavesurfer.skipForward();
+      }
+      if (handled) {
+        e.preventDefault();
+      }
     }
   }
   

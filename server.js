@@ -37,7 +37,7 @@ app.get('/youtube/:link', async function (req, res) {
 
 app.get('/youtube', async function (req, res) {
   var link = req.query.link;
-  console.log("fetching audio of " + link + "found by query")
+  console.log("fetching audio of " + link + " (found by query)")
   try {
     for await (const chunk of stream(link)) {
       res.write(chunk)
@@ -55,7 +55,7 @@ app.get('/youtube', async function (req, res) {
 
 // Root Route
 app.get('/', function (req, res) {
-  
+  console.clear();
   res.render('pages/index', {
     // output: audioFormats
   });

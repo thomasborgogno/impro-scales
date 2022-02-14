@@ -5,7 +5,7 @@ let isEssentiaInstance = false;
 // buffer size microphone stream (bufferSize is high in order to make PitchYinProbabilistic algo to work)
 // let bufferSize = 8192;
 // let hopSize = 2048;
-let bufferSize = 2048;
+let bufferSize = 4096;
 let hopSize = 512;
 let chordConfidence = 0.75;
 
@@ -86,6 +86,7 @@ function getVideoInfo(videoURL) {
   let videoINFO;
   // get video info
   var infoURL = "https://www.youtube.com/oembed?url=" + videoURL + "&format=json"
+  
   fetch(infoURL)
       .then(response => response.json()).then( json => videoINFO = json)
       .catch(error => console.error(error))
@@ -99,10 +100,10 @@ function getVideoInfo(videoURL) {
 }
 
 function printVideoInfo(){
-  $('#vidTitleHeader').text(session.title);
-  $('#vidTitleHeader').attr('href', session.videoURL);
-  $('#vidAuthorHeader').text(session.channel);
-  $('#vidAuthorHeader').attr('href', session.channelURL);
+  // $('#vidTitleHeader').text(session.title);
+  // $('#vidTitleHeader').attr('href', session.videoURL);
+  // $('#vidAuthorHeader').text(session.channel);
+  // $('#vidAuthorHeader').attr('href', session.channelURL);
 }
 
 
@@ -114,7 +115,7 @@ async function fetchYoutubeAudio() {
     getVideoInfo(videoURL);
 
     session.audioURL = "http://" + window.location.host + "/youtube/?link=" + videoURL;
-    console.log(session);
+    // console.log(session);
     loadWaveform();
   } else {
     Swal.fire({
@@ -124,7 +125,7 @@ async function fetchYoutubeAudio() {
     })  
   }
     // } else {
-    //   $("#emptyPlayer").show();
+    //   $("#emptyPlayer").fadeIn();
     //   Swal.fire({
     //     icon: 'error',
     //     title: 'Error while fetching the audio',
@@ -133,7 +134,7 @@ async function fetchYoutubeAudio() {
     // }
 }
 
-// callback function which compute Chords of the audio
+// callback function which compute Chords and features of the audio and saves in the session
 async function featureExtractor() {
   $('.text.loader').text('Analyzing audio track, please wait...')
 
@@ -144,7 +145,9 @@ async function featureExtractor() {
   session.bpm = parseInt(essentiaExtractor.PercivalBpmEstimator(signal).bpm);
 
   let tonal = essentiaExtractor.TonalExtractor(signal);
-  session.key = tonal.key_key + " " + tonal.key_scale;
+  session.key = tonal.key_key;
+  session.scaleName = tonal.key_scale === 'major' ? getObjectKeyByPrefix(scales, "Ionian") : getObjectKeyByPrefix(scales, "Aeolian");
+  session.scaleArray = getScaleArray(session.key, session.scaleName);
 
   let ticks = await essentiaExtractor.BeatTrackerMultiFeature(signal).ticks;
   // let ticks = await essentiaExtractor.BeatTrackerDegara(signal).ticks;
@@ -180,7 +183,6 @@ async function featureExtractor() {
       chordsArray.push(detChords.chords.get(i));
       ticksArray.push(ticks.get(i));
     }
-    printFeatures();
     
   }
 
@@ -190,39 +192,39 @@ async function featureExtractor() {
   }
   session.chordsSet = chordsString.slice(0, -2);
 
-  $('#chordsSet').text(session.chordsSet);
-  $('#chordsSetSegment').fadeIn();
+  session.chordsArray = JSON.stringify(chordsArray);
+  session.ticksArray = JSON.stringify(ticksArray);
+  
+  printFeatures();
   $('#loader').dimmer('hide');
-  updateChords();
-  printChordsLines();
   togglePlay();
+
+  session.statsArray = Array(12).fill(0);
   saveSession();
 }
 
 function printFeatures(){
-  $("#keyHeader").text(session.key);
-  $("#bpmHeader").text(session.bpm + " bpm");
-}
 
-//todo: try to move this away
-async function cursorStream() {
-  while(wavesurfer.isPlaying()) {
-    while(wavesurfer.getCurrentTime() > ticksArray[chordsCursor + 1]) {
-      ++chordsCursor;
-      updateChords();
-    }
-    if(chordsCursor > 0 && wavesurfer.getCurrentTime() < ticksArray[chordsCursor]) {
-      chordsCursor = 0;
-      updateChords();
-    }
-    await sleep(10);
-  }
+  $("#keyHeader").text(session.key);
+  $('#bpmHeader').text(session.bpm + "bpm")
+  $('#scaleHeader').text(session.scaleName);
+
+  printStats();
+
+  $("#nowPlayingHeader").text("Now playing: " + session.title)
+  $("#nowPlayingHeader").attr('href', session.videoURL);
+
+  printScaleDisplay();
+  
+  // $('#chordsSet').text(session.chordsSet);
+  updateChords();
+  $('#chordsDiv').fadeIn();
 }
 
 function updateChords() {
   // <-
-  // if(chordsCursor >= 1) $("#previousChordHeader").text(chordsArray[chordsCursor - 1]);
-  // else $("#previousChordHeader").text("");
+  if(chordsCursor >= 1) $("#previousChordHeader").text(chordsArray[chordsCursor - 1]);
+  else $("#previousChordHeader").text("");
   // |
   if(chordsCursor < chordsArray.length) $("#currentChordHeader").text(chordsArray[chordsCursor]);
   else $("#currentChordHeader").text("");
@@ -262,6 +264,9 @@ $(function () {
 $('#load_audio_btn').on('click', function(){
   stop();
   clearCanvas();
+  $("#keyHeader").text("");
+  $('#scaleHeader').text("");
+  $("#bpmHeader").text("");
   $("#chordsSet").text("");
   newSession = true;
   fetchYoutubeAudio();
@@ -275,9 +280,24 @@ $('.message .close').on('click', function() {
 
 $('#volume_btn').popup({ position: 'right center', hoverable: true });
 
+$('.ui.toggle').checkbox({
+  onChecked: function () { 
+    printChordsLines(); 
+    $('#chordsDisplay').fadeIn();
+    $('#chordsDiv').css({'padding-bottom':'40px'});
+    // $('#chordsSetSegment').fadeIn();
+  },
+  onUnchecked: function () { 
+    clearCanvas(); 
+    $('#chordsDisplay').fadeOut();
+    $('#chordsDiv').css({'padding-bottom':'0px'});
+    // $('#chordsSetSegment').fadeOut();
+  }
+});
 
 // keyboard Enter event listener for link input
 $('#input_yt_url').on('keydown', function(e) {
+
   if (e.key === 'Enter') {
     $('#load_audio_btn').trigger('click');
     e.preventDefault();

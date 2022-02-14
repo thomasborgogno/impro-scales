@@ -18,7 +18,8 @@
     "sweetalert2": "^11.3.5",
     "wavesurfer.js": "^5.2.0",
     "youtube-audio-stream": "^0.3.44",
-    "youtube-dl-exec": "^2.0.2"
+    "youtube-dl-exec": "^2.0.2",
+    "ytdl-core": "^4.10.1"
   },
   "overrides": {
     "graceful-fs": "^4.2.9"

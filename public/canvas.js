@@ -3,22 +3,18 @@ let w = wavesurfer.drawer.container.clientWidth;
 let h = wavesurfer.getHeight();
 let canvas, canvasCtx;
 
+function printChordsLines() {
+  chordsArray.forEach( function(chord, i) {
 
-function drawOneChordLine(chord, time) {
-  const margin = 15;
-  // calculate chord x position in px given the time in seconds
-  const x = Math.round(time * w / wavesurfer.getDuration());
+    const margin = 15;
+    // calculate chord x position in px given the time in seconds
+    const x = Math.round(ticksArray[i] * w / wavesurfer.getDuration());
 
-  canvasCtx.beginPath();
-  canvasCtx.fillText(chord, x, 10);
-  canvasCtx.moveTo(x, margin);
-  canvasCtx.lineTo(x, wavesurfer.getHeight()-margin);
-  canvasCtx.stroke();
-}
-
-function printChordsLines(){
-  chordsArray.forEach( function(c, i) {
-    drawOneChordLine(c, ticksArray[i]);
+    canvasCtx.beginPath();
+    canvasCtx.fillText(chord, x, 10);
+    canvasCtx.moveTo(x, margin);
+    canvasCtx.lineTo(x, wavesurfer.getHeight()-margin);
+    canvasCtx.stroke();
   });
 }
 
