@@ -52,7 +52,7 @@ async function fetchYoutubeAudio() {
     getVideoInfo(videoURL);
 
     const host = window.location.host;
-    if (host.includes("localhost")) session.audioURL = "http://" + host + "/youtube/?link=" + videoURL;
+    if (host.includes("localhost") || host.includes("thomasborgogno.it")) session.audioURL = "http://" + host + "/youtube/?link=" + videoURL;
     else session.audioURL = "https://" + host + "/youtube/?link=" + videoURL;
     console.log(session);
     loadWaveform();
