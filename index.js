@@ -1,8 +1,10 @@
 
 // Load Node modules
 var express = require('express');
-const ejs = require('ejs');
 const stream = require('youtube-audio-stream')
+const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
+const ffmpeg = require('fluent-ffmpeg');
+ffmpeg.setFfmpegPath(ffmpegPath);
 
 // Initialise Express
 var app = express();
