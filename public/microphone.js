@@ -63,8 +63,7 @@ function stopMicRecordStream() {
   if (recording) {
     $('#mic_ready').show();
     $('#mic_stop').hide();
-    $('#currentNoteHeader').css({'color': 'black'});
-    printCorrectNote();
+    silenceHideNotes();
     $('#currentNoteDiv').hide();
 
     console.log("Stopped recording ...");
@@ -137,7 +136,7 @@ function onRecordFeatureExtractor(event) {
   } else {
     if(silence >= 0 && ++silence > silenceThreshold) {
       $('#currentNoteHeader').css({'color': 'black'});
-      printCorrectNote();
+      silenceHideNotes();
       silence = -1;
     }
   }

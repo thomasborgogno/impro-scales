@@ -3,20 +3,29 @@
 let sessionsList = {};
 
 function saveSession() {
+  
+  if (sessionsList === null) {
+    sessionsList = {};
+  }
   if (typeof (Storage) != "undefined") {
     sessionsList[session.title] = JSON.stringify(session);
     localStorage.setItem("sessionsList", JSON.stringify(sessionsList));
     console.log('Saving session:');
     console.log(sessionsList[session.title]);
+    console.log("Sessions list:");
+    console.log(sessionsList);
     printAllSessions();
   }
+
 }
 
 function deleteSession(title) {
-  if (typeof (Storage) != "undefined") {
-    if (sessionsList[title]) {
-      delete sessionsList[title];
-    }
+  if (sessionsList[title]) {
+    console.log("Deleting session: " + title);
+    delete sessionsList[title];
+  }
+  if (typeof (Storage) != "undefined" && jQuery.isEmptyObject(session)) {
+    localStorage.setItem("sessionsList", JSON.stringify(sessionsList));
   }
 }
 
@@ -28,28 +37,30 @@ function printAllSessions() {
 
     // retrive sessions
     sessionsList = JSON.parse(localStorage.getItem("sessionsList"));
+
+    // if there are session stored and the page is reloaded (empty session) or there are more than 1 sessions saved
+    if (sessionsList === null) {
+      sessionsList = {};
+    }
     console.log("Sessions:");
     console.log(sessionsList);
 
-    // if there are session stored and the page is reloaded (empty session) or there are more than 1 sessions saved
-    if (sessionsList) {
-      if ((jQuery.isEmptyObject(session) && !jQuery.isEmptyObject(sessionsList)) || Object.keys(sessionsList).length >= 2) {
+    if ((jQuery.isEmptyObject(session) && !jQuery.isEmptyObject(sessionsList)) || Object.keys(sessionsList).length >= 2) {
 
-        //clear the previous sessions list
-        $('#sessionsList').empty();
+      //clear the previous sessions list
+      $('#sessionsList').empty();
 
-        //print and show the new sessions list
-        for (const title in sessionsList) {
-          if (title != 'undefined') {
-            addSessionItem(title);
-          }
+      //print and show the new sessions list
+      for (const title in sessionsList) {
+        if (title != 'undefined') {
+          addSessionItem(title);
         }
-        $('#storageSegment').fadeIn();
-
       }
+      $('#storageSegment').fadeIn();
+
+    } else {
+      $('#storageSegment').fadeOut();
     }
-  } else {
-    $('#storageSegment').fadeOut();
   }
 }
 
@@ -115,6 +126,10 @@ function showSessionRelatedThings() {
     $('#edit_tonal_btn').fadeOut();
     $('#tonalInfoDiv').fadeOut();
     $('#scaleStatsDiv').fadeOut();
+    printScaleDisplay(true);
+    wavesurfer.empty();
+    $("#nowPlayingHeader").text("");
+
   } else {
     $('#delete_song_btn').fadeIn();
     $('#edit_tonal_btn').fadeIn();
@@ -172,9 +187,10 @@ $('#clear_storage_btn').on('click', function () {
 $('#modal_delete_all_songs_btn').on('click', function () {
   stop();
   stopMicRecordStream();
-  localStorage.clear();
-  $('#storageSegmentContent').text("");
-  $('#storageSegment').fadeOut();
+  sessionsList = {};
+  session = {};
+  deleteSession("");
+  printAllSessions();
 });
 
 $('#edit_tonal_btn').on('click', function () {
@@ -245,8 +261,9 @@ $('#delete_song_btn').on('click', function () {
 $('#modal_delete_song_btn').on('click', function () {
   stop();
   stopMicRecordStream();
-  deleteSession(session.title);
+  const title = session.title;
   session = {};
+  deleteSession(title);
   printAllSessions();
 });
 

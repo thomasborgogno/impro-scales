@@ -20,67 +20,6 @@ let ticksArray = [];
 
 let scriptNode;
 
-/*
-const computeChords = function(audioVectorBuffer) {
-
-  let hpcpPool = new essentiaExtractor.module.VectorVectorFloat();
-
-  // audio frame => windowing => spectrum => spectral peak => spectral whitening => HPCP => ChordDetection
-  let windowOut = essentiaExtractor.Windowing(
-    audioVectorBuffer,
-    true,
-    bufferSize,
-    "blackmanharris62"
-  );
-
-  let spectrumOut = essentiaExtractor.Spectrum(windowOut.frame, bufferSize);
-
-  let peaksOut = essentiaExtractor.SpectralPeaks(
-    spectrumOut.spectrum,
-    0,
-    4000,
-    100,
-    60,
-    "frequency",
-    audioCtx.sampleRate
-  );
-
-  let whiteningOut = essentiaExtractor.SpectralWhitening(
-    spectrumOut.spectrum,
-    peaksOut.frequencies,
-    peaksOut.magnitudes,
-    4000,
-    audioCtx.sampleRate
-  );
-
-  let hpcpOut = essentiaExtractor.HPCP(
-    peaksOut.frequencies,
-    whiteningOut.magnitudes,
-    true,
-    500,
-    0,
-    4000,
-    false,
-    60,
-    true,
-    "unitMax",
-    440,
-    audioCtx.sampleRate,
-    12
-  );
-
-  hpcpPool.push_back(hpcpOut.hpcp);
-
-  let chordDetect = essentiaExtractor.ChordsDetection(hpcpPool, bufferSize, audioCtx.sampleRate);
-
-  let chords = chordDetect.chords.get(0);
-  
-  let chordsStrength = chordDetect.strength.get(0);
-    
-  return {chord: chords, strength: chordsStrength};
-};
-*/
-
 
 function getVideoInfo(videoURL) {
   let videoINFO;
@@ -100,10 +39,8 @@ function getVideoInfo(videoURL) {
 }
 
 function printVideoInfo(){
-  // $('#vidTitleHeader').text(session.title);
-  // $('#vidTitleHeader').attr('href', session.videoURL);
-  // $('#vidAuthorHeader').text(session.channel);
-  // $('#vidAuthorHeader').attr('href', session.channelURL);
+  $("#nowPlayingHeader").text("Now playing: " + session.title);
+  $("#nowPlayingHeader").attr('href', session.videoURL);
 }
 
 
@@ -114,8 +51,10 @@ async function fetchYoutubeAudio() {
     session.videoURL = videoURL;
     getVideoInfo(videoURL);
 
-    session.audioURL = "https://" + window.location.host + "/youtube/?link=" + videoURL;
-    // console.log(session);
+    const host = window.location.host;
+    if (host.includes("localhost")) session.audioURL = "http://" + host + "/youtube/?link=" + videoURL;
+    else session.audioURL = "https://" + host + "/youtube/?link=" + videoURL;
+    console.log(session);
     loadWaveform();
   } else {
     Swal.fire({
@@ -148,6 +87,7 @@ async function featureExtractor() {
   session.key = tonal.key_key;
   session.scaleName = tonal.key_scale === 'major' ? getObjectKeyByPrefix(scales, "Ionian") : getObjectKeyByPrefix(scales, "Aeolian");
   session.scaleArray = getScaleArray(session.key, session.scaleName);
+  session.statsArray = Array(12).fill(0);
 
   let ticks = await essentiaExtractor.BeatTrackerMultiFeature(signal).ticks;
   // let ticks = await essentiaExtractor.BeatTrackerDegara(signal).ticks;
@@ -199,7 +139,6 @@ async function featureExtractor() {
   $('#loader').dimmer('hide');
   togglePlay();
 
-  session.statsArray = Array(12).fill(0);
   saveSession();
 }
 
@@ -211,12 +150,8 @@ function printFeatures(){
 
   printStats();
 
-  $("#nowPlayingHeader").text("Now playing: " + session.title)
-  $("#nowPlayingHeader").attr('href', session.videoURL);
-
-  printScaleDisplay();
+  printScaleDisplay(false);
   
-  // $('#chordsSet').text(session.chordsSet);
   updateChords();
   $('#chordsDiv').fadeIn();
 }
