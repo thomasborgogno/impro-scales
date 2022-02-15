@@ -49,13 +49,7 @@ const togglePlay = () => {
     $("#pause").hide();
   }
 }
-// /**
-//  * Toggle mic play button
-//  */
-// const toggleMic = () => {
 
-//   togglePlay();
-// }
 /**
  * Stop playing
  */

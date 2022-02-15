@@ -32,23 +32,24 @@ function printAllSessions() {
     console.log(sessionsList);
 
     // if there are session stored and the page is reloaded (empty session) or there are more than 1 sessions saved
-    // TODO:
-    if ((jQuery.isEmptyObject(session) && !jQuery.isEmptyObject(sessionsList)) || Object.keys(sessionsList).length >= 2) {
+    if (sessionsList) {
+      if ((jQuery.isEmptyObject(session) && !jQuery.isEmptyObject(sessionsList)) || Object.keys(sessionsList).length >= 2) {
 
-      //clear the previous sessions list
-      $('#sessionsList').empty();
+        //clear the previous sessions list
+        $('#sessionsList').empty();
 
-      //print and show the new sessions list
-      for (const title in sessionsList) {
-        if (title != 'undefined') {
-          addSessionItem(title);
+        //print and show the new sessions list
+        for (const title in sessionsList) {
+          if (title != 'undefined') {
+            addSessionItem(title);
+          }
         }
-      }
-      $('#storageSegment').fadeIn();
+        $('#storageSegment').fadeIn();
 
-    } else {
-      $('#storageSegment').fadeOut();
+      }
     }
+  } else {
+    $('#storageSegment').fadeOut();
   }
 }
 
