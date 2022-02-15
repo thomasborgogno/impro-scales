@@ -114,7 +114,7 @@ async function fetchYoutubeAudio() {
     session.videoURL = videoURL;
     getVideoInfo(videoURL);
 
-    session.audioURL = "http://" + window.location.host + "/youtube/?link=" + videoURL;
+    session.audioURL = "https://" + window.location.host + "/youtube/?link=" + videoURL;
     // console.log(session);
     loadWaveform();
   } else {
