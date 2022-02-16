@@ -44,7 +44,7 @@ function printVideoInfo(){
 }
 
 
-async function fetchYoutubeAudio() {
+function fetchYoutubeAudio() {
   var videoURL = document.getElementById("input_yt_url").value;
 
   if(videoURL !== "") {
@@ -63,14 +63,6 @@ async function fetchYoutubeAudio() {
       text: 'Please insert a youtube link to load a song.'
     })  
   }
-    // } else {
-    //   $("#emptyPlayer").fadeIn();
-    //   Swal.fire({
-    //     icon: 'error',
-    //     title: 'Error while fetching the audio',
-    //     text: 'Please check the link or try with another link.'
-    //   })  
-    // }
 }
 
 // callback function which compute Chords and features of the audio and saves in the session
@@ -79,11 +71,11 @@ async function featureExtractor() {
 
   // load audio file from an url
   audioData = await essentiaExtractor.getAudioChannelDataFromURL(session.audioURL, audioCtx, 0);
-  let signal = essentiaExtractor.arrayToVector(audioData);
+  let signal = await essentiaExtractor.arrayToVector(audioData);
 
   session.bpm = parseInt(essentiaExtractor.PercivalBpmEstimator(signal).bpm);
 
-  let tonal = essentiaExtractor.TonalExtractor(signal);
+  let tonal = await essentiaExtractor.TonalExtractor(signal);
   session.key = tonal.key_key;
   session.scaleName = tonal.key_scale === 'major' ? getObjectKeyByPrefix(scales, "Ionian") : getObjectKeyByPrefix(scales, "Aeolian");
   session.scaleArray = getScaleArray(session.key, session.scaleName);
@@ -94,7 +86,7 @@ async function featureExtractor() {
 
   let hpcpPool = new essentiaExtractor.module.VectorVectorFloat();
   // Generate overlapping frames with given frameSize and hopSize
-  let audioFrames = essentiaExtractor.FrameGenerator(audioData, bufferSize, hopSize);
+  let audioFrames = await essentiaExtractor.FrameGenerator(audioData, bufferSize, hopSize);
   for (var i=0; i<audioFrames.size(); i++) {
     hpcpPool.push_back(essentiaExtractor.arrayToVector(essentiaExtractor.hpcpExtractor(essentiaExtractor.vectorToArray(audioFrames.get(i)))));
   }
@@ -104,7 +96,7 @@ async function featureExtractor() {
 
   //print chords
   chordsArray = [];
-  let chordsSet = new Set();
+  // let chordsSet = new Set();
   ticksArray = [];
   for (var i=0; i<detChords.chords.size(); i++) {
 
@@ -119,18 +111,18 @@ async function featureExtractor() {
     if(i < detChords.chords.size()) {
       console.log(formatTimecode(ticks.get(i)) + "s:\t" + detChords.chords.get(i) + "\ts: " + parseInt(detChords.strength.get(i)*100));
 
-      chordsSet.add(detChords.chords.get(i));
+      // chordsSet.add(detChords.chords.get(i));
       chordsArray.push(detChords.chords.get(i));
       ticksArray.push(ticks.get(i));
     }
     
   }
 
-  let chordsString = "";
-  for(const c of chordsSet){
-    chordsString += c + ", ";
-  }
-  session.chordsSet = chordsString.slice(0, -2);
+  // let chordsString = "";
+  // for(const c of chordsSet){
+  //   chordsString += c + ", ";
+  // }
+  // session.chordsSet = chordsString.slice(0, -2);
 
   session.chordsArray = JSON.stringify(chordsArray);
   session.ticksArray = JSON.stringify(ticksArray);
