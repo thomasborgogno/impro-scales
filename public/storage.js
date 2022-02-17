@@ -3,17 +3,16 @@
 let sessionsList = {};
 
 function saveSession() {
+  showSessionRelatedThings();
   
   if (sessionsList === null) {
     sessionsList = {};
   }
-  if (typeof (Storage) != "undefined") {
+  if (typeof (Storage) != "undefined" && session.title) {
     sessionsList[session.title] = JSON.stringify(session);
     localStorage.setItem("sessionsList", JSON.stringify(sessionsList));
     console.log('Saving session:');
     console.log(sessionsList[session.title]);
-    console.log("Sessions list:");
-    console.log(sessionsList);
     printAllSessions();
   }
 
@@ -48,7 +47,7 @@ function printAllSessions() {
     if ((jQuery.isEmptyObject(session) && !jQuery.isEmptyObject(sessionsList)) || Object.keys(sessionsList).length >= 2) {
 
       //clear the previous sessions list
-      $('#sessionsList').empty();
+      $('.sessions.list').empty();
 
       //print and show the new sessions list
       for (const title in sessionsList) {
@@ -56,10 +55,10 @@ function printAllSessions() {
           addSessionItem(title);
         }
       }
-      $('#storageSegment').fadeIn();
+      $('.storage.segment').fadeIn();
 
     } else {
-      $('#storageSegment').fadeOut();
+      $('.storage.segment').fadeOut();
     }
   }
 }
@@ -86,7 +85,7 @@ function addSessionItem(title) {
   var li = document.createElement("li");
   li.setAttribute('id', title);
   li.appendChild(document.createTextNode(title));
-  $('#sessionsList').append(li);
+  $('.sessions.list').append(li);
 }
 
 // STATS
@@ -122,7 +121,7 @@ function loadStats() {
 function showSessionRelatedThings() {
 
   if (jQuery.isEmptyObject(session)) {
-    $('#delete_song_btn').fadeOut();
+    $('.deletesong.button').fadeOut();
     $('#edit_tonal_btn').fadeOut();
     $('#tonalInfoDiv').fadeOut();
     $('#scaleStatsDiv').fadeOut();
@@ -131,32 +130,71 @@ function showSessionRelatedThings() {
     $("#nowPlayingHeader").text("");
 
   } else {
-    $('#delete_song_btn').fadeIn();
     $('#edit_tonal_btn').fadeIn();
     $('#tonalInfoDiv').fadeIn();
     $('#scaleStatsDiv').fadeIn();
+    if (session.title) $('.deletesong.button').fadeIn();
+    else $('.deletesong.button').fadeOut();
   }
 }
 
+function initKeyAndScaleDropdown(key, scaleName) {
+  let dropdownScales = [];
+  let selectedValue;
+  $.each(scales, function (name) {
+    let tmp = {};
+    tmp.name = name;
+    tmp.value = scales[name]["index"];
+    tmp.description = scales[name]["type"];
+    if (name === scaleName) selectedValue = tmp.value;
+    dropdownScales.push(tmp);
+  });
+
+  $('.ui.scale.modal.dropdown').dropdown({ 
+    values: dropdownScales,
+    onChange: function() {
+      const dropScaleName = $(this).find('option:selected').text();
+      const dropKey = $('.ui.key.modal.dropdown').find('option:selected').text();
+      updateFormScaleAndNotes(dropKey, dropScaleName);
+    }
+  });
+
+  $('.ui.scale.landing.dropdown').dropdown({ 
+    values: dropdownScales,
+    onChange: function() {
+      const dropScaleName = $(this).find('option:selected').text();
+      const dropKey = $('.ui.key.landing.dropdown').find('option:selected').text();
+      updateFormScaleAndNotes(dropKey, dropScaleName);
+    }
+  });
+
+  if (selectedValue) $('.ui.scale.dropdown').dropdown('set selected', selectedValue);
+  else $('.ui.scale.dropdown').dropdown('set selected', 0);
+  $('.ui.key.dropdown select').val(notes.indexOf(key)).trigger('change');
+  updateFormScaleAndNotes(key, scaleName);
+}
+
 function updateFormScaleAndNotes(key, scaleName) {
-  // console.log(key, scaleName);
   const scaleDesc = scales[scaleName]["description"];
   const scaleNotes = getScaleArray(key, scaleName).join(',\xa0\xa0 ');
 
-  $('#modeDescriptionMessage').text(scaleDesc);
-  $('#notesInKeyMessage').text(scaleNotes);
+  $('.scale.mode.description').text(scaleDesc);
+  $('.mylist.notes.key').text(scaleNotes);
 }
 
 
 // DOCUMENT READY
 $(function () {
+  if (jQuery.isEmptyObject(session)) initKeyAndScaleDropdown("C", getObjectKeyByPrefix(scales, "Ionian"));
+  else initKeyAndScaleDropdown(session.key, session.scaleName);
+  
   printAllSessions();
   loadStats();
 });
 
 
 //  btns listener
-$('#sessionsList').on('click', async function (e) {
+$('.sessions.list').on('click', async function (e) {
   if (e.target && e.target.matches('li')) {
     let title = e.target.innerText;
     stop();
@@ -167,12 +205,22 @@ $('#sessionsList').on('click', async function (e) {
   }
 });
 
-$('#modal_load_session_btn').on('click', function () {
-  newSession = false;
+$('#modal_load_session_btn').on('click', async function () {
+  switchPage('main page');
   showSessionRelatedThings();
   loadWaveform();
-  chordsArray = Object.values(JSON.parse(session.chordsArray));
-  ticksArray = Object.values(JSON.parse(session.ticksArray));
+
+  if (session.hasChords) {
+    chordsArray = Object.values(JSON.parse(session.chordsArray));
+    ticksArray = Object.values(JSON.parse(session.ticksArray));
+    newSession = false;
+  } else if ($('#computeChordsCheckbox').is(':checked')) {
+    newSession = true;
+    await chordsExtractor(false);
+    showChords();
+    saveSession();
+  }
+
   console.log("Loading session:")
   console.log(session);
   clearCanvas();
@@ -180,7 +228,7 @@ $('#modal_load_session_btn').on('click', function () {
   printFeatures();
 });
 
-$('#clear_storage_btn').on('click', function () {
+$('.deleteallsongs.button').on('click', function () {
   $('#deleteAllSessionsModal').modal('show');
 });
 
@@ -194,57 +242,44 @@ $('#modal_delete_all_songs_btn').on('click', function () {
 });
 
 $('#edit_tonal_btn').on('click', function () {
-  // initialize the scales dropdown
-  let dropdownScales = [];
-  let selectedValue;
-  $.each(scales, function (name) {
-    let tmp = {};
-    tmp.name = name;
-    tmp.value = scales[name]["index"];
-    tmp.description = scales[name]["type"];
-    if (name === session.scaleName) selectedValue = tmp.value;
-    dropdownScales.push(tmp);
-  });
-
-  $('.ui.scale.dropdown').dropdown({ 
-    values: dropdownScales,
-    onChange: function() {
-      const scaleName = $(this).find('option:selected').text();
-      const key = $('.ui.key.dropdown').find('option:selected').text();
-      updateFormScaleAndNotes(key, scaleName);
-    }    
-  });
-
-  $('.ui.scale.dropdown').dropdown('set selected', selectedValue.toString());
+  initKeyAndScaleDropdown(session.key, session.scaleName);
   
   // set up the form labels
   $('#song_title_input').val(session.title);
   
-  $('.ui.key.dropdown select').val(notes.indexOf(session.key)).trigger('change');
-  updateFormScaleAndNotes(session.key, session.scaleName);
+  // $('.ui.key.dropdown select').val(notes.indexOf(session.key)).trigger('change');
+  // updateFormScaleAndNotes(session.key, session.scaleName);
 
   // shows the modal form
   $('#editSessionModal').modal({ context: '#editSessionWrapper' }).modal('show');
 });
 
 
-$('.ui.key.dropdown').dropdown({
+$('.ui.key.modal.dropdown').dropdown({
   onChange: function(key) {
-    const scaleName = $('.ui.scale.dropdown').find('option:selected').text();
+    const scaleName = $('.ui.scale.modal.dropdown').find('option:selected').text();
+    updateFormScaleAndNotes(notes[key], scaleName);
+  }
+});
+
+$('.ui.key.landing.dropdown').dropdown({
+  onChange: function(key) {
+    const scaleName = $('.ui.scale.landing.dropdown').find('option:selected').text();
+    console.log(scaleName);
     updateFormScaleAndNotes(notes[key], scaleName);
   }
 });
 
 $('#modal_save_edit_btn').on('click', function () {
   const newTitle = $('#song_title_input').val();
-  if (newTitle != session.title) {
+  if (session.title && newTitle != session.title) {
     deleteSession(session.title);
     session.title = newTitle;
     console.log(session);
   }
 
-  session.key = $('.ui.key.dropdown').find('option:selected').text();
-  session.scaleName = $('.ui.scale.dropdown').find('option:selected').text();
+  session.key = $('.ui.key.modal.dropdown').find('option:selected').text();
+  session.scaleName = $('.ui.scale.modal.dropdown').find('option:selected').text();
   session.scaleArray = getScaleArray(session.key, session.scaleName);
   session.statsArray = Array(12).fill(0);
   saveSession();
@@ -253,7 +288,7 @@ $('#modal_save_edit_btn').on('click', function () {
 });
 
 
-$('#delete_song_btn').on('click', function () {
+$('.deletesong.button').on('click', function () {
   $('#modalDeleteSongName').text(session.title);
   $('#deleteSessionModal').modal('show');
 });
@@ -265,6 +300,7 @@ $('#modal_delete_song_btn').on('click', function () {
   session = {};
   deleteSession(title);
   printAllSessions();
+  $('#computeChordsCheckbox').prop('checked', false);
 });
 
 

@@ -11,7 +11,6 @@ let chordConfidence = 0.75;
 
 let session = {};
 let newSession;
-let audioData;
 
 // let filePicker = document.getElementById('filePicker')
 let chordsCursor = 0;
@@ -44,8 +43,7 @@ function printVideoInfo(){
 }
 
 
-function fetchYoutubeAudio() {
-  var videoURL = document.getElementById("input_yt_url").value;
+function fetchYoutubeAudio(videoURL) {
 
   if(videoURL !== "") {
     session.videoURL = videoURL;
@@ -67,11 +65,10 @@ function fetchYoutubeAudio() {
 
 // callback function which compute Chords and features of the audio and saves in the session
 async function featureExtractor() {
-  $('.text.loader').text('Analyzing audio track, please wait...')
+  $('.text.loader').text('Analyzing audio track, please wait...');
 
   // load audio file from an url
-  audioData = await essentiaExtractor.getAudioChannelDataFromURL(session.audioURL, audioCtx, 0);
-  let signal = await essentiaExtractor.arrayToVector(audioData);
+  let signal = essentiaExtractor.arrayToVector(await essentiaExtractor.getAudioChannelDataFromURL(session.audioURL, audioCtx, 0));
 
   session.bpm = parseInt(essentiaExtractor.PercivalBpmEstimator(signal).bpm);
 
@@ -80,6 +77,27 @@ async function featureExtractor() {
   session.scaleName = tonal.key_scale === 'major' ? getObjectKeyByPrefix(scales, "Ionian") : getObjectKeyByPrefix(scales, "Aeolian");
   session.scaleArray = getScaleArray(session.key, session.scaleName);
   session.statsArray = Array(12).fill(0);
+
+  if ($('#computeChordsCheckbox').is(':checked')) await chordsExtractor(false);
+  else session.hasChords = false;
+  
+  printFeatures();
+  $('#loader').dimmer('hide');
+  togglePlay();
+
+  saveSession();
+}
+
+
+async function chordsExtractor(isNewExtraction) {
+  $('.text.loader').text('Analyzing audio track, please wait...');
+  if (isNewExtraction) {
+    $('#loader').dimmer('show');
+  }
+
+  // load audio file from an url
+  const audioData = await essentiaExtractor.getAudioChannelDataFromURL(session.audioURL, audioCtx, 0);
+  const signal = await essentiaExtractor.arrayToVector(audioData);
 
   let ticks = await essentiaExtractor.BeatTrackerMultiFeature(signal).ticks;
   // let ticks = await essentiaExtractor.BeatTrackerDegara(signal).ticks;
@@ -94,9 +112,8 @@ async function featureExtractor() {
   // let detChords = await essentiaExtractor.ChordsDetectionBeats(hpcpPool, ticks, 'starting_beat');
   let detChords = await essentiaExtractor.ChordsDetectionBeats(hpcpPool, ticks, 'interbeat_median');
 
-  //print chords
+  // save only valid chords
   chordsArray = [];
-  // let chordsSet = new Set();
   ticksArray = [];
   for (var i=0; i<detChords.chords.size(); i++) {
 
@@ -111,28 +128,18 @@ async function featureExtractor() {
     if(i < detChords.chords.size()) {
       console.log(formatTimecode(ticks.get(i)) + "s:\t" + detChords.chords.get(i) + "\ts: " + parseInt(detChords.strength.get(i)*100));
 
-      // chordsSet.add(detChords.chords.get(i));
       chordsArray.push(detChords.chords.get(i));
       ticksArray.push(ticks.get(i));
     }
-    
   }
-
-  // let chordsString = "";
-  // for(const c of chordsSet){
-  //   chordsString += c + ", ";
-  // }
-  // session.chordsSet = chordsString.slice(0, -2);
 
   session.chordsArray = JSON.stringify(chordsArray);
   session.ticksArray = JSON.stringify(ticksArray);
-  
-  printFeatures();
-  $('#loader').dimmer('hide');
-  togglePlay();
+  session.hasChords = true;
 
-  saveSession();
+  if (isNewExtraction) $('#loader').dimmer('hide');
 }
+
 
 function printFeatures(){
 
@@ -144,8 +151,17 @@ function printFeatures(){
 
   printScaleDisplay(false);
   
+  if (session.hasChords && $('#computeChordsCheckbox').is(':checked')) showChords();
+  else $('#chordsToggleLabel').text("Compute chords:");
+  
+}
+
+function showChords() {
+  $('#chordsToggleLabel').text("Show chords:");
   updateChords();
-  $('#chordsDiv').fadeIn();
+  printChordsLines();
+  $('#chordsDisplay').fadeIn();
+  $('#chordsDiv').css({'padding-bottom':'40px'});
 }
 
 function updateChords() {
@@ -158,6 +174,39 @@ function updateChords() {
   // ->
   if(chordsCursor + 1 < chordsArray.length) $("#nextChordHeader").text(chordsArray[chordsCursor + 1]);
   else $("#nextChordHeader").text("");
+}
+
+function switchPage(page) {
+  switch (page) {
+    case 'landing':
+      $('#landingPage').fadeIn();
+      $('#mainPage').fadeOut();
+      $('.menu.yt.url').fadeOut();
+      break;
+    case 'scale only':
+      $('#bpmDiv').hide();
+      $('#chordsDiv').hide();
+      $('.audioPlayer').hide();
+      $('.red.mic.scaleonly').show();
+      $('#modalSongTitle').hide();
+      $('#landingPage').fadeOut();
+      $('#mainPage').fadeIn();
+      $("#landing_input_yt_url").val("");
+      $('.menu.yt.url').fadeIn();
+      break;
+    case 'main page':
+    default:
+      $('#bpmDiv').fadeIn();
+      $('#chordsDiv').fadeIn();
+      $('.audioPlayer').fadeIn();
+      $('.red.mic.scaleonly').fadeOut();
+      $('#modalSongTitle').show();
+      $('#landingPage').fadeOut();
+      $('#mainPage').fadeIn();
+      $("#landing_input_yt_url").val("");
+      $('.menu.yt.url').fadeIn();
+      createCanvas();
+  }
 }
 
 
@@ -188,7 +237,7 @@ $(function () {
 });
 
 // buttons listener
-$('#load_audio_btn').on('click', function(){
+$('#load_audio_btn, #landing_load_audio_btn').on('click', function(){
   stop();
   clearCanvas();
   $("#keyHeader").text("");
@@ -196,7 +245,22 @@ $('#load_audio_btn').on('click', function(){
   $("#bpmHeader").text("");
   $("#chordsSet").text("");
   newSession = true;
-  fetchYoutubeAudio();
+  let videoURL = $("#landing_input_yt_url").val();
+  if (videoURL === "") videoURL = $("#input_yt_url").val();
+  switchPage('main page');
+  fetchYoutubeAudio(videoURL);
+});
+
+$('#scale_only_btn').on('click', function() {
+  session.key = $('.ui.key.landing.dropdown').find('option:selected').text();
+  session.scaleName = $('.ui.scale.landing.dropdown').find('option:selected').text();
+  session.scaleArray = getScaleArray(session.key, session.scaleName);
+  session.statsArray = Array(12).fill(0);
+  saveSession();
+  
+  printVideoInfo();
+  printFeatures();
+  switchPage('scale only');
 });
 
 $('.ui.accordion').accordion();
@@ -207,23 +271,35 @@ $('.message .close').on('click', function() {
 
 $('#volume_btn').popup({ position: 'right center', hoverable: true });
 
-$('.ui.toggle').checkbox({
-  onChecked: function () { 
-    printChordsLines(); 
-    $('#chordsDisplay').fadeIn();
-    $('#chordsDiv').css({'padding-bottom':'40px'});
-    // $('#chordsSetSegment').fadeIn();
+$('.ui.mainpage.toggle').checkbox({
+  onChecked: async function () { 
+    if (session.hasChords) {
+      showChords();
+    } else if (!jQuery.isEmptyObject(session)) {
+      if (wavesurfer.isPlaying()) togglePlay();
+      await chordsExtractor(true);
+      showChords();
+      saveSession();
+    }
   },
   onUnchecked: function () { 
     clearCanvas(); 
     $('#chordsDisplay').fadeOut();
     $('#chordsDiv').css({'padding-bottom':'0px'});
-    // $('#chordsSetSegment').fadeOut();
+  }
+});
+
+$('.ui.landing.toggle').checkbox({
+  onChecked: async function () { 
+    $('#computeChordsCheckbox').prop('checked', true);
+  },
+  onUnchecked: function () { 
+    $('#computeChordsCheckbox').prop('checked', false);
   }
 });
 
 // keyboard Enter event listener for link input
-$('#input_yt_url').on('keydown', function(e) {
+$('#input_yt_url, #landing_input_yt_url').on('keydown', function(e) {
 
   if (e.key === 'Enter') {
     $('#load_audio_btn').trigger('click');

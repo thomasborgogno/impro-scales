@@ -59,10 +59,10 @@ function startMicRecordStream(audioCtx, bufferSize, onProcessCallback, btnCallba
 }
 
 function stopMicRecordStream() {
-  let recording = $('#play_mic_btn').hasClass("recording");
+  let recording = $('.red.mic').hasClass("recording");
   if (recording) {
-    $('#mic_ready').show();
-    $('#mic_stop').hide();
+    $('.mic.ready.icons').show();
+    $('.mic.stop.icon').hide();
     silenceHideNotes();
     $('#currentNoteDiv').hide();
 
@@ -71,7 +71,7 @@ function stopMicRecordStream() {
     gumStream.getAudioTracks().forEach(function(track) {
       track.stop();
     });
-    $("#play_mic_btn").removeClass("recording");
+    $('.red.mic').removeClass("recording");
 
     audioCtx.suspend().then(() => {
       mic.disconnect();
@@ -148,7 +148,7 @@ $(function () {
 });
 
 // BTN LISTENERS
-$('#play_mic_btn').on('click', function(){
+$('.red.mic').on('click', function(){
 
   let recording = $(this).hasClass("recording");
   if (!recording) {
@@ -162,10 +162,9 @@ $('#play_mic_btn').on('click', function(){
       onRecordFeatureExtractor, // essentia.js feature extractor callback function
       function() {
         // called when the promise fulfilled
-        $("#play_mic_btn").addClass("recording");
-        $('#mic_ready').hide();
-        $('#mic_stop').show();
-        // $("#play_mic_btn").prop("disabled", false);
+        $('.red.mic').addClass("recording");
+        $('.mic.ready.icons').hide();
+        $('.mic.stop.icon').show();
       }
     );
 
@@ -176,9 +175,7 @@ $('#play_mic_btn').on('click', function(){
 
   } else {
     stopMicRecordStream();
-    if (wavesurfer.isPlaying()) {
-      togglePlay();
-    }
+    if (wavesurfer.isPlaying()) togglePlay();
     saveStats();
     saveSession();
   }

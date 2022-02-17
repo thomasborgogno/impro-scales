@@ -1,11 +1,11 @@
 // retriving waveform dimensions
-let w = wavesurfer.drawer.container.clientWidth;
-let h = wavesurfer.getHeight();
+let w;
+let h;
 let canvas, canvasCtx;
 
 function printChordsLines() {
-  chordsArray.forEach( function(chord, i) {
 
+  chordsArray.forEach( function(chord, i) {
     const margin = 15;
     // calculate chord x position in px given the time in seconds
     const x = Math.round(ticksArray[i] * w / wavesurfer.getDuration());
@@ -21,9 +21,10 @@ function printChordsLines() {
 function clearCanvas() {
   canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
 }
- 
-// DOCUMENT READY
-$(function createCanvas() {
+
+function createCanvas() {
+  w = wavesurfer.drawer.container.clientWidth;
+  h = wavesurfer.getHeight();
 
   // using device pixel ratio to compute canvas dimensions
   let ratio = window.devicePixelRatio;
@@ -40,4 +41,9 @@ $(function createCanvas() {
   canvasCtx.fillStyle = 'white';
   canvasCtx.font = '15px Calibri';
   canvasCtx.textAlign = 'center';
+}
+ 
+// DOCUMENT READY
+$(function(){
+  createCanvas();
 });

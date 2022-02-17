@@ -58,7 +58,7 @@ app.get('/youtube', async function (req, res) {
 // Root Route
 app.get('/', function (req, res) {
   console.clear();
-  res.render('pages/index', {
+  res.render('index', {
     // output: audioFormats
   });
 }); 
