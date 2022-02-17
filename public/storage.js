@@ -44,7 +44,7 @@ function printAllSessions() {
     console.log("Sessions:");
     console.log(sessionsList);
 
-    if ((jQuery.isEmptyObject(session) && !jQuery.isEmptyObject(sessionsList)) || Object.keys(sessionsList).length >= 2) {
+    if (!jQuery.isEmptyObject(sessionsList)) {
 
       //clear the previous sessions list
       $('.sessions.list').empty();
@@ -170,7 +170,8 @@ function initKeyAndScaleDropdown(key, scaleName) {
 
   if (selectedValue) $('.ui.scale.dropdown').dropdown('set selected', selectedValue);
   else $('.ui.scale.dropdown').dropdown('set selected', 0);
-  $('.ui.key.dropdown select').val(notes.indexOf(key)).trigger('change');
+  $('.ui.key.landing.dropdown select').val(notes.indexOf(key)).trigger('change');
+  $('.ui.key.modal.dropdown select').val(notes.indexOf(key)).trigger('change');
   updateFormScaleAndNotes(key, scaleName);
 }
 
@@ -246,9 +247,6 @@ $('#edit_tonal_btn').on('click', function () {
   
   // set up the form labels
   $('#song_title_input').val(session.title);
-  
-  // $('.ui.key.dropdown select').val(notes.indexOf(session.key)).trigger('change');
-  // updateFormScaleAndNotes(session.key, session.scaleName);
 
   // shows the modal form
   $('#editSessionModal').modal({ context: '#editSessionWrapper' }).modal('show');
