@@ -19,6 +19,10 @@ let ticksArray = [];
 
 let scriptNode;
 
+// variables to count seconds in the console log
+const countSeconds = true;
+let startTime;
+
 
 function getVideoInfo(videoURL) {
   let videoINFO;
@@ -54,6 +58,7 @@ function fetchYoutubeAudio(videoURL) {
     else session.audioURL = "https://" + host + "/youtube/?link=" + videoURL;
     console.log(session);
     loadWaveform();
+    if (countSeconds) startTime = Date.now();
   } else {
     Swal.fire({
       icon: 'error',
@@ -65,7 +70,8 @@ function fetchYoutubeAudio(videoURL) {
 
 // callback function which compute Chords and features of the audio and saves in the session
 async function featureExtractor() {
-  console.log("WAVESURFER DONE");
+  if (countSeconds) console.log(timeDiff() + " WAVESURFER DONE");
+  
   $('.text.loader').text('Analyzing audio track, please wait...');
 
   // load audio file from an url
@@ -78,11 +84,11 @@ async function featureExtractor() {
   session.scaleName = tonal.key_scale === 'major' ? getObjectKeyByPrefix(scales, "Ionian") : getObjectKeyByPrefix(scales, "Aeolian");
   session.scaleArray = getScaleArray(session.key, session.scaleName);
   session.statsArray = Array(12).fill(0);
-  console.log("BASIC FEATURES DONE");
+
+  if (countSeconds) console.log(timeDiff() + " BASIC FEATURES DONE");
 
   if ($('#computeChordsCheckbox').is(':checked')) await chordsExtractor(false);
   else session.hasChords = false;
-  console.log("CHORDS DONE");
 
   printFeatures();
   $('#loader').dimmer('hide');
@@ -139,6 +145,8 @@ async function chordsExtractor(isNewExtraction) {
   session.chordsArray = JSON.stringify(chordsArray);
   session.ticksArray = JSON.stringify(ticksArray);
   session.hasChords = true;
+
+  if (countSeconds) console.log(timeDiff() + " CHORDS DONE");
 
   if (isNewExtraction) $('#loader').dimmer('hide');
 }

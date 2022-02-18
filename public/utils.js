@@ -3,6 +3,11 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+function timeDiff() {
+  const secDiff = (Date.now()-startTime) / 1000;
+  return "0."+Math.floor(secDiff/60)+"."+Math.floor(secDiff%60);
+}
+
 function indexOfMax(arr) {
 
   if (arr.length === 0) {

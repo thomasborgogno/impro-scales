@@ -5,54 +5,44 @@ let gumStream;
 
 // record native microphone input and do further audio processing on each audio buffer using the given callback functions
 function startMicRecordStream(audioCtx, bufferSize, onProcessCallback, btnCallback) {
-  // cross-browser support for getUserMedia
-  navigator.getUserMedia =
-    navigator.getUserMedia ||
-    navigator.webkitGetUserMedia ||
-    navigator.mozGetUserMedia ||
-    navigator.msGetUserMedia;
-  window.URL =
-    window.URL || window.webkitURL || window.mozURL || window.msURL;
 
-  if (navigator.getUserMedia) {
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
     console.log("Initializing microphone audio...");
-    navigator.getUserMedia(
-      { audio: true, video: false },
-      function(stream) {
-        gumStream = stream;
-        if (gumStream.active) {
-          console.log(
-            "Audio context sample rate = " + audioCtx.sampleRate
-          );
-          mic = audioCtx.createMediaStreamSource(stream);
-          // We need the buffer size that is a power of two
-          if (bufferSize % 2 != 0 || bufferSize < 4096) {
-            throw "Choose a buffer size that is a power of two and greater than 4096";
-          }
-          // In most platforms where the sample rate is 44.1 kHz or 48 kHz,
-          // and the default bufferSize will be 4096, giving 10-12 updates/sec.
-          console.log("Buffer size = " + bufferSize);
-          if (audioCtx.state == "suspended") {
-            audioCtx.resume();
-          }
-          scriptNode = audioCtx.createScriptProcessor(bufferSize, 1, 1);
-          // onprocess callback (here we can use essentia.js algos)
-          scriptNode.onaudioprocess = onProcessCallback;
-
-          mic.connect(scriptNode);
-          scriptNode.connect(audioCtx.destination);
-
-          if (btnCallback) {
-            btnCallback();
-          }
-        } else {
-          throw "Mic stream not active";
+    navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+    .then(function(stream) {
+      gumStream = stream;
+      if (gumStream.active) {
+        console.log(
+          "Audio context sample rate = " + audioCtx.sampleRate
+        );
+        mic = audioCtx.createMediaStreamSource(stream);
+        // We need the buffer size that is a power of two
+        if (bufferSize % 2 != 0 || bufferSize < 4096) {
+          throw "Choose a buffer size that is a power of two and greater than 4096";
         }
-      },
-      function(message) {
-        throw "Could not access microphone - " + message;
-      }
-    );
+        // In most platforms where the sample rate is 44.1 kHz or 48 kHz,
+        // and the default bufferSize will be 4096, giving 10-12 updates/sec.
+        console.log("Buffer size = " + bufferSize);
+        if (audioCtx.state == "suspended") {
+          audioCtx.resume();
+        }
+        scriptNode = audioCtx.createScriptProcessor(bufferSize, 1, 1);
+        // onprocess callback (here we can use essentia.js algos)
+        scriptNode.onaudioprocess = onProcessCallback;
+
+        mic.connect(scriptNode);
+        scriptNode.connect(audioCtx.destination);
+
+        if (btnCallback) {
+          btnCallback();
+        }
+      } else {
+        throw "Mic stream not active";
+      }})
+    
+    .catch( function(message) {
+      throw "Could not access microphone - " + message;
+    });
   } else {
     throw "Could not access microphone - getUserMedia not available";
   }
