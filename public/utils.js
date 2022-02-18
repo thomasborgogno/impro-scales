@@ -5,6 +5,7 @@ function sleep(ms) {
 
 function timeDiff() {
   const secDiff = (Date.now()-startTime) / 1000;
+  startTime = Date.now();
   return "0."+Math.floor(secDiff/60)+"."+Math.floor(secDiff%60);
 }
 
