@@ -65,6 +65,7 @@ function fetchYoutubeAudio(videoURL) {
 
 // callback function which compute Chords and features of the audio and saves in the session
 async function featureExtractor() {
+  console.log("WAVESURFER DONE");
   $('.text.loader').text('Analyzing audio track, please wait...');
 
   // load audio file from an url
@@ -77,10 +78,12 @@ async function featureExtractor() {
   session.scaleName = tonal.key_scale === 'major' ? getObjectKeyByPrefix(scales, "Ionian") : getObjectKeyByPrefix(scales, "Aeolian");
   session.scaleArray = getScaleArray(session.key, session.scaleName);
   session.statsArray = Array(12).fill(0);
+  console.log("BASIC FEATURES DONE");
 
   if ($('#computeChordsCheckbox').is(':checked')) await chordsExtractor(false);
   else session.hasChords = false;
-  
+  console.log("CHORDS DONE");
+
   printFeatures();
   $('#loader').dimmer('hide');
   togglePlay();
