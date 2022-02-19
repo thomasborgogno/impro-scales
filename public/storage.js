@@ -188,6 +188,8 @@ function updateFormScaleAndNotes(key, scaleName) {
 $(function () {
   if (jQuery.isEmptyObject(session)) initKeyAndScaleDropdown("C", getObjectKeyByPrefix(scales, "Ionian"));
   else initKeyAndScaleDropdown(session.key, session.scaleName);
+
+  if (typeof (Storage) != "undefined" && !localStorage.dismissHeadphones) $('.headphones.message').fadeIn();
   
   printAllSessions();
   loadStats();
@@ -195,7 +197,7 @@ $(function () {
 
 
 //  btns listener
-$('.sessions.list').on('click', async function (e) {
+$('.sessions.list').on('click', function (e) {
   if (e.target && e.target.matches('li')) {
     let title = e.target.innerText;
     stop();
@@ -206,17 +208,22 @@ $('.sessions.list').on('click', async function (e) {
   }
 });
 
+$('#dismiss_headphones_btn').on('click', function(){
+  $('.headphones.message').fadeOut();
+  if (typeof (Storage) != "undefined") localStorage.dismissHeadphones = true;
+});
+
 $('#modal_load_session_btn').on('click', async function () {
   switchPage('main page');
   showSessionRelatedThings();
   loadWaveform();
+  newSession = false;
 
   if (session.hasChords) {
     chordsArray = Object.values(JSON.parse(session.chordsArray));
     ticksArray = Object.values(JSON.parse(session.ticksArray));
-    newSession = false;
+    $('#chordsToggleLabel').text("Show chords:");
   } else if ($('#computeChordsCheckbox').is(':checked')) {
-    newSession = true;
     await chordsExtractor(false);
     showChords();
     saveSession();

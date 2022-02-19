@@ -172,7 +172,6 @@ function showChords() {
   updateChords();
   printChordsLines();
   $('#chordsDisplay').fadeIn();
-  $('#chordsDiv').css({'padding-bottom':'40px'});
 }
 
 function updateChords() {
@@ -296,7 +295,6 @@ $('.ui.mainpage.toggle').checkbox({
   onUnchecked: function () { 
     clearCanvas(); 
     $('#chordsDisplay').fadeOut();
-    $('#chordsDiv').css({'padding-bottom':'0px'});
   }
 });
 
