@@ -188,8 +188,6 @@ function updateFormScaleAndNotes(key, scaleName) {
 $(function () {
   if (jQuery.isEmptyObject(session)) initKeyAndScaleDropdown("C", getObjectKeyByPrefix(scales, "Ionian"));
   else initKeyAndScaleDropdown(session.key, session.scaleName);
-
-  if (typeof (Storage) != "undefined" && !localStorage.dismissHeadphones) $('.headphones.message').fadeIn();
   
   printAllSessions();
   loadStats();

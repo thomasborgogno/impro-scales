@@ -64,7 +64,7 @@ function fetchYoutubeAudio(videoURL) {
       icon: 'error',
       title: 'Empty field',
       text: 'Please insert a youtube link to load a song.'
-    })  
+    });
   }
 }
 
@@ -197,6 +197,7 @@ function switchPage(page) {
       $('#bpmDiv').hide();
       $('#chordsDiv').hide();
       $('.audioPlayer').hide();
+      $('.headphones.message').hide();
       $('.red.mic.scaleonly').show();
       $('#modalSongTitle').hide();
       $('#landingPage').fadeOut();
@@ -206,6 +207,7 @@ function switchPage(page) {
       break;
     case 'main page':
     default:
+      if (typeof (Storage) != "undefined" && !localStorage.dismissHeadphones) $('.headphones.message').fadeIn();
       $('#bpmDiv').fadeIn();
       $('#chordsDiv').fadeIn();
       $('.audioPlayer').fadeIn();
