@@ -152,10 +152,15 @@ wavesurfer.on('seek', () => {
   seekChordsTime();
 })
 
-// Resets the play button icon after audio ends
+// Resets the play button icon after audio ends, stops the mic if it's recording.
 wavesurfer.on('finish', () => {
   $("#play").show();
   $("#pause").hide();
+  if ( $('.red.mic').hasClass("recording") ) {
+    stopMicRecordStream();
+    saveStats();
+    saveSession();
+  }
 })
 
 wavesurfer.on('error', (e) => {

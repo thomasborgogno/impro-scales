@@ -92,7 +92,7 @@ async function featureExtractor() {
 
   printFeatures();
   $('#loader').dimmer('hide');
-  togglePlay();
+  // togglePlay();
 
   saveSession();
 }

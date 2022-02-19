@@ -80,7 +80,7 @@ function getScaleArray(key, scaleName) {
 
 function silenceHideNotes() {
   // resets scale notes color
-  $('#scaleNotes').children().css({'color': 'dimgray', 'font-size':'xx-large'});
+  $('#scaleNotes').children().css({'color': 'dimgray', 'font-size':'40px'});
   $('#currentNoteDiv').fadeOut();
 }
 
@@ -97,7 +97,7 @@ function printCorrectNote(note) {
   // resets scale notes color and hide the note error div
   silenceHideNotes();
   // since the note is in the scale, enlarge it and don't show a note error
-  $('#' + notes.indexOf(note)).css({'color': '#3EB249', 'font-size':'xxx-large'});
+  $('#' + notes.indexOf(note)).css({'color': '#3EB249', 'font-size':'60px'});
 
   // update stats
   ++numCorrectNotes;
@@ -106,7 +106,7 @@ function printCorrectNote(note) {
 
 function printOutOfScaleNote(note) {
   // resets scale notes color
-  $('#scaleNotes').children().css({'color': 'dimgray', 'font-size':'xx-large'});
+  $('#scaleNotes').children().css({'color': 'dimgray', 'font-size':'40px'});
 
   // display the wrong note in red
   $('#currentNoteDiv').children().css({'color': 'crimson'});
@@ -133,24 +133,24 @@ function printScaleDisplay(reset) {
       const noteIndex = notes.indexOf(note);
       const noteOcc = session.statsArray[noteIndex];
       numInScale += noteOcc;
-      $('#scaleNotes').append('<p id="' + noteIndex + '" style="font-size:xx-large; color:dimgray; margin-bottom:0px">' + note + '</p>');
-      $('#stats_inScaleNotes').append('<p style="color:white; margin-bottom:0px">' + note + '</p>');
-      $('#stats_inScaleOcc').append('<p id="stat' + noteIndex + '" style="color:grey; margin-bottom:0px">' + noteOcc + '</p>');
+      $('#scaleNotes').append('<p id="' + noteIndex + '" style="font-size:40px; color:dimgray; margin-bottom:0px">' + note + '</p>');
+      $('#stats_inScaleNotes').append('<p style="color:LightSkyBlue; margin-bottom:0px">' + note + '</p>');
+      $('#stats_inScaleOcc').append('<p id="stat' + noteIndex + '" style="color:white; margin-bottom:0px">' + noteOcc + '</p>');
     });
-    $('#stats_inScaleNotes').append('<p style="color:white; margin-bottom:0px">TOT</p>');
-    $('#stats_inScaleOcc').append('<p id="statInTot" style="color:grey; margin-bottom:0px">' + numInScale + '</p>');
+    $('#stats_inScaleNotes').append('<p style="color:LightSkyBlue; margin-bottom:0px">TOT</p>');
+    $('#stats_inScaleOcc').append('<p id="statInTot" style="color:white; margin-bottom:0px">' + numInScale + '</p>');
 
     let numOutOfScale = 0;
     notes.forEach(function(note, noteIndex) {
       if (!session.scaleArray.includes(note)) {
         const noteOcc = session.statsArray[noteIndex];
         numOutOfScale += noteOcc;
-        $('#stats_outOfScaleNotes').append('<p style="color:white; margin-bottom:0px">' + note + '</p>');
-        $('#stats_outOfScaleOcc').append('<p id="stat' + noteIndex + '" style="color:grey; margin-bottom:0px">' + noteOcc + '</p>');
+        $('#stats_outOfScaleNotes').append('<p style="color:LightSkyBlue; margin-bottom:0px">' + note + '</p>');
+        $('#stats_outOfScaleOcc').append('<p id="stat' + noteIndex + '" style="color:white; margin-bottom:0px">' + noteOcc + '</p>');
       }
     });
-    $('#stats_outOfScaleNotes').append('<p style="color:white; margin-bottom:0px">TOT</p>');
-    $('#stats_outOfScaleOcc').append('<p id="statOutTot" style="color:grey; margin-bottom:0px">' + numOutOfScale + '</p>');
+    $('#stats_outOfScaleNotes').append('<p style="color:LightSkyBlue; margin-bottom:0px">TOT</p>');
+    $('#stats_outOfScaleOcc').append('<p id="statOutTot" style="color:white; margin-bottom:0px">' + numOutOfScale + '</p>');
   }
 
 }
