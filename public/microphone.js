@@ -77,7 +77,7 @@ const noteBufferSize = 3;
 let silence = 0;
 const silenceThreshold = 20;
 
-// ScriptNodeProcessor callback function to extract pitchyin feature using essentia.js and plotting it on the front-end
+// ScriptNodeProcessor callback function to extract pitchyin feature using essentia.js
 function onRecordFeatureExtractor(event) {
 
   let audioBuffer = event.inputBuffer.getChannelData(0);
@@ -89,7 +89,6 @@ function onRecordFeatureExtractor(event) {
   if (rms >= 0.05) {
     if (silence) {
       silence = 0;
-      // $('#currentNoteHeader').show();
     }
     const prevNote = mostFrequent(noteBuffer);
 

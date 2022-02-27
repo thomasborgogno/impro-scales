@@ -71,9 +71,8 @@ function getScaleArray(key, scaleName) {
     const intervals = scales[scaleName]["intervals"];
     scaleArray = intervals.map( i => notes[ (tonic=tonic+i)%12 ] );
     scaleArray.rotate(-1);
-    // console.log(scaleArray);
   } else {
-    console.log('scale not found');
+    console.error('scale not found');
   }
   return scaleArray;
 }

@@ -28,8 +28,8 @@ function indexOfMax(arr) {
   return maxIndex;
 }
 
+// returns the most occurring element in an Array
 function mostFrequent(arr){
-
   let obj = {};
   let maxVal;
   let maxOcc;
@@ -44,6 +44,7 @@ function mostFrequent(arr){
   return maxVal;
 }
 
+// rotate Array elements by n (n>0: rotate left, n<0: rotate right)
 Array.prototype.rotate = function(n) {
   n = n % this.length;
   while (this.length && n < 0) n += this.length;

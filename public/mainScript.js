@@ -25,8 +25,8 @@ let startTime;
 
 
 function getVideoInfo(videoURL) {
-  let videoINFO;
-  // get video info
+  
+  // compose the url to retrieve video informations based on YouTube APIs 
   var infoURL = "https://www.youtube.com/oembed?url=" + videoURL + "&format=json"
   
   fetch(infoURL)
@@ -81,7 +81,10 @@ async function featureExtractor() {
 
   let tonal = await essentiaExtractor.TonalExtractor(signal);
   session.key = tonal.key_key;
-  session.scaleName = tonal.key_scale === 'major' ? getObjectKeyByPrefix(scales, "Ionian") : getObjectKeyByPrefix(scales, "Aeolian");
+
+  if (tonal.key_scale === 'major') session.scaleName = getObjectKeyByPrefix(scales, "Ionian");
+  else session.scaleName = getObjectKeyByPrefix(scales, "Aeolian");
+  
   session.scaleArray = getScaleArray(session.key, session.scaleName);
   session.statsArray = Array(12).fill(0);
 
@@ -142,6 +145,7 @@ async function chordsExtractor(isNewExtraction) {
     }
   }
 
+  // save the computed chords in the current session
   session.chordsArray = JSON.stringify(chordsArray);
   session.ticksArray = JSON.stringify(ticksArray);
   session.hasChords = true;
@@ -235,8 +239,6 @@ $(function () {
   EssentiaWASM().then(function (essentiaWasmModule) {
     if (!isEssentiaInstance) {
       essentiaExtractor = new EssentiaExtractor(essentiaWasmModule);
-      // settings specific to an algorithm
-      // essentiaExtractor.profile.HPCP.nonLinear = true;
       // modifying default extractor settings
       essentiaExtractor.bufferSize = bufferSize;
       essentiaExtractor.hopSize = hopSize;

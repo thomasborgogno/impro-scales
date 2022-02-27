@@ -37,13 +37,13 @@ function printAllSessions() {
     // retrive sessions
     sessionsList = JSON.parse(localStorage.getItem("sessionsList"));
 
-    // if there are session stored and the page is reloaded (empty session) or there are more than 1 sessions saved
     if (sessionsList === null) {
       sessionsList = {};
     }
     console.log("Sessions:");
     console.log(sessionsList);
 
+    // if there are session stored
     if (!jQuery.isEmptyObject(sessionsList)) {
 
       //clear the previous sessions list
@@ -52,7 +52,10 @@ function printAllSessions() {
       //print and show the new sessions list
       for (const title in sessionsList) {
         if (title != 'undefined') {
-          addSessionItem(title);
+          var li = document.createElement("li");
+          li.setAttribute('id', title);
+          li.appendChild(document.createTextNode(title));
+          $('.sessions.list').append(li);
         }
       }
       $('.storage.segment').fadeIn();
@@ -81,12 +84,6 @@ function loadSession(title) {
   }
 }
 
-function addSessionItem(title) {
-  var li = document.createElement("li");
-  li.setAttribute('id', title);
-  li.appendChild(document.createTextNode(title));
-  $('.sessions.list').append(li);
-}
 
 // STATS
 
