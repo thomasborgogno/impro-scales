@@ -1,5 +1,5 @@
 
-// note values   0        1        2    3        4        5        6        7    8        9       10       11
+//note indexes:  0        1        2    3        4        5        6        7    8        9       10       11
 const notes = [ "A", ["A#","Bb"], "B", "C", ["C#","Db"], "D", ["D#","Eb"], "E", "F", ["F#","Gb"], "G", ["G#","Ab"] ];
 let scales = {
   "Ionian (major scale)": {
@@ -62,8 +62,7 @@ let numCorrectNotes = 0;
 let numWrongNotes = 0;
 
 function getNoteString(noteIndex, isFlat) {
-  sharpFlat = isFlat ? 1 : 0;
-  return notes[noteIndex][sharpFlat];
+  return notes[noteIndex][isFlat ? 1 : 0];
 }
 
 function getNoteIndex(noteString) {
