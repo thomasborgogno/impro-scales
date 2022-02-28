@@ -1,6 +1,6 @@
 
-// note values 0    1     2    3    4     5    6     7    8    9     10   11
-const notes = ["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"];
+// note values   0        1        2    3        4        5        6        7    8        9       10       11
+const notes = [ "A", ["A#","Bb"], "B", "C", ["C#","Db"], "D", ["D#","Eb"], "E", "F", ["F#","Gb"], "G", ["G#","Ab"] ];
 let scales = {
   "Ionian (major scale)": {
     index: 0,
@@ -61,16 +61,38 @@ let scales = {
 let numCorrectNotes = 0;
 let numWrongNotes = 0;
 
+function getNoteString(noteIndex, isFlat) {
+  sharpFlat = isFlat ? 1 : 0;
+  return notes[noteIndex][sharpFlat];
+}
+
+function getNoteIndex(noteString) {
+  if (noteString.length === 1) return notes.indexOf(noteString);
+  else {
+    if (noteString.charAt(1) === "#") return (notes.indexOf(noteString.charAt(0)) + 1).mod(12);
+    else return (notes.indexOf(noteString.charAt(0)) - 1).mod(12);
+  }
+}
 
 function getScaleArray(key, scaleName) {
-  
-  let tonic = notes.indexOf(key);
-  let scaleArray = [];
+  let tonic = getNoteIndex(key);
+  let scaleArray = [key];
 
   if (scales[scaleName]) {
     const intervals = scales[scaleName]["intervals"];
-    scaleArray = intervals.map( i => notes[ (tonic=tonic+i)%12 ] );
-    scaleArray.rotate(-1);
+    let scaleIdArray = intervals.map( i => (tonic=tonic+i)%12 );
+    scaleIdArray.pop();
+    let note;
+    scaleIdArray.forEach(function (noteIndex, i) {
+      // check if is an alteration (flat or sharp)
+      if ( Array.isArray(notes[noteIndex]) ) {
+        let prevNoteLetter = scaleArray[scaleArray.length-1].charAt(0);
+        note = nextChar(prevNoteLetter, Math.floor((intervals[i]+1)/2))
+        if (getNoteString(noteIndex, false).indexOf(note) === 0) note = getNoteString(noteIndex, false);
+        else note = getNoteString(noteIndex, true);
+      } else note = getNoteString(noteIndex);
+      scaleArray.push(note);
+    });
   } else {
     console.error('scale not found');
   }
@@ -83,34 +105,34 @@ function silenceHideNotes() {
   $('#currentNoteDiv').fadeOut();
 }
 
-function printGenericNote(note) {
+function printGenericNote(noteId) {
   // if there isn't a song loaded, don't show a scale but show the currently played note in white
   $('#scaleNotes').children().remove();
   $('#currentNoteDiv').children().css({'color': 'white'});
   $('#currentNoteLabel').text("Playing note:");
-  $('#currentNoteHeader').text(note);  
+  $('#currentNoteHeader').text(notes[noteId]);  
   $('#currentNoteDiv').show();
 }
 
-function printCorrectNote(note) {
+function printCorrectNote(noteId) {
   // resets scale notes color and hide the note error div
   silenceHideNotes();
   // since the note is in the scale, enlarge it and don't show a note error
-  $('#' + notes.indexOf(note)).css({'color': '#3EB249', 'font-size':'60px'});
+  $('#' + noteId).css({'color': '#3EB249', 'font-size':'60px'});
 
   // update stats
   ++numCorrectNotes;
   printStats();
 }
 
-function printOutOfScaleNote(note) {
+function printOutOfScaleNote(noteId) {
   // resets scale notes color
   $('#scaleNotes').children().css({'color': 'dimgray', 'font-size':'40px'});
 
   // display the wrong note in red
   $('#currentNoteDiv').children().css({'color': 'crimson'});
   $('#currentNoteLabel').text("Out of scale note:");
-  $('#currentNoteHeader').text(note); 
+  $('#currentNoteHeader').text(getNoteString(noteId)); 
   $('#currentNoteDiv').show();
 
   // update stats
@@ -129,7 +151,7 @@ function printScaleDisplay(reset) {
     let numInScale = 0;
 
     session.scaleArray.forEach(function(note) {
-      const noteIndex = notes.indexOf(note);
+      const noteIndex = getNoteIndex(note);
       const noteOcc = session.statsArray[noteIndex];
       numInScale += noteOcc;
       $('#scaleNotes').append('<p id="' + noteIndex + '" style="font-size:40px; color:dimgray; margin-bottom:0px">' + note + '</p>');
@@ -141,10 +163,10 @@ function printScaleDisplay(reset) {
 
     let numOutOfScale = 0;
     notes.forEach(function(note, noteIndex) {
-      if (!session.scaleArray.includes(note)) {
+      if (!session.scaleIdArray.includes(noteIndex)) {
         const noteOcc = session.statsArray[noteIndex];
         numOutOfScale += noteOcc;
-        $('#stats_outOfScaleNotes').append('<p style="color:LightSkyBlue; margin-bottom:0px">' + note + '</p>');
+        $('#stats_outOfScaleNotes').append('<p style="color:LightSkyBlue; margin-bottom:0px">' + note[0] + '</p>');
         $('#stats_outOfScaleOcc').append('<p id="stat' + noteIndex + '" style="color:white; margin-bottom:0px">' + noteOcc + '</p>');
       }
     });
@@ -162,7 +184,7 @@ function printStats() {
 
     session.statsArray.forEach((occ, noteIndex) => {
       $('#stat' + noteIndex).text(occ);
-      if (session.scaleArray.includes(notes[noteIndex])) numInScale += occ;
+      if (session.scaleIdArray.includes(noteIndex)) numInScale += occ;
       else numOutOfScale += occ;
     });
     $('#statInTot').text(numInScale);

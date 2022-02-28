@@ -86,6 +86,7 @@ async function featureExtractor() {
   else session.scaleName = getObjectKeyByPrefix(scales, "Aeolian");
   
   session.scaleArray = getScaleArray(session.key, session.scaleName);
+  session.scaleIdArray = session.scaleArray.map(note => getNoteIndex(note));
   session.statsArray = Array(12).fill(0);
 
   if (countSeconds) console.log(timeDiff() + " BASIC FEATURES DONE");
@@ -269,6 +270,7 @@ $('#scale_only_btn').on('click', function() {
   session.key = $('.ui.key.landing.dropdown').find('option:selected').text();
   session.scaleName = $('.ui.scale.landing.dropdown').find('option:selected').text();
   session.scaleArray = getScaleArray(session.key, session.scaleName);
+  session.scaleIdArray = session.scaleArray.map(note => getNoteIndex(note));
   session.statsArray = Array(12).fill(0);
   saveSession();
   

@@ -167,8 +167,8 @@ function initKeyAndScaleDropdown(key, scaleName) {
 
   if (selectedValue) $('.ui.scale.dropdown').dropdown('set selected', selectedValue);
   else $('.ui.scale.dropdown').dropdown('set selected', 0);
-  $('.ui.key.landing.dropdown select').val(notes.indexOf(key)).trigger('change');
-  $('.ui.key.modal.dropdown select').val(notes.indexOf(key)).trigger('change');
+  $('.ui.key.landing.dropdown').dropdown('set selected', key);
+  $('.ui.key.modal.dropdown').dropdown('set selected', key);
   updateFormScaleAndNotes(key, scaleName);
 }
 
@@ -237,11 +237,13 @@ $('.deleteallsongs.button').on('click', function () {
 
 $('#modal_delete_all_songs_btn').on('click', function () {
   stop();
+  wavesurfer.empty();
   stopMicRecordStream();
   sessionsList = {};
   session = {};
   deleteSession("");
   printAllSessions();
+  switchPage('landing');
 });
 
 $('#edit_tonal_btn').on('click', function () {
@@ -258,15 +260,14 @@ $('#edit_tonal_btn').on('click', function () {
 $('.ui.key.modal.dropdown').dropdown({
   onChange: function(key) {
     const scaleName = $('.ui.scale.modal.dropdown').find('option:selected').text();
-    updateFormScaleAndNotes(notes[key], scaleName);
+    updateFormScaleAndNotes(key, scaleName);
   }
 });
 
 $('.ui.key.landing.dropdown').dropdown({
   onChange: function(key) {
     const scaleName = $('.ui.scale.landing.dropdown').find('option:selected').text();
-    console.log(scaleName);
-    updateFormScaleAndNotes(notes[key], scaleName);
+    updateFormScaleAndNotes(key, scaleName);
   }
 });
 
@@ -281,6 +282,7 @@ $('#modal_save_edit_btn').on('click', function () {
   session.key = $('.ui.key.modal.dropdown').find('option:selected').text();
   session.scaleName = $('.ui.scale.modal.dropdown').find('option:selected').text();
   session.scaleArray = getScaleArray(session.key, session.scaleName);
+  session.scaleIdArray = session.scaleArray.map(note => getNoteIndex(note));
   session.statsArray = Array(12).fill(0);
   saveSession();
   printVideoInfo();
@@ -301,6 +303,7 @@ $('#modal_delete_song_btn').on('click', function () {
   deleteSession(title);
   printAllSessions();
   $('#computeChordsCheckbox').prop('checked', false);
+  switchPage('landing');
 });
 
 

@@ -63,3 +63,17 @@ function getObjectKeyByPrefix(obj, name){
   }
   return "no such property!";
 }
+
+// modulo operator
+Number.prototype.mod = function (n) {
+  return ((this % n) + n) % n;
+};
+
+// increments a character (from A to G)
+function nextChar(c, iterations) {
+  for (i=0; i<iterations; ++i) {
+    if (c === "G") c = "A"
+    else c = String.fromCharCode(c.charCodeAt(0) + 1);
+  }
+  return c;
+}

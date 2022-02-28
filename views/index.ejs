@@ -17,7 +17,7 @@
     
 
     <!-- MENU -->
-    <div class="ui inverted menu" style="margin: 0px;">
+    <div class="ui inverted menu" style="margin-top:15px;">
       <div class="container">
         <div class="left item" style="position:unset;">
           <a href="/" style="color: white"><i class="guitar big icon" style="margin-left:20px; margin-right:10px;"></i></a>
@@ -69,33 +69,43 @@
       <!-- SCALE OR SONG SEGMENT -->
       <div class="ui inverted center aligned segment" style="display:flex; align-items:center; height:60%; margin:0px; background-color:black;">
         
-        <div class="ui inverted very padded placeholder segment" style="width: 80%; padding:30px; padding-bottom:10px; margin: auto;">
+        <div class="ui inverted very padded placeholder segment" style="width: 85%; padding:30px; padding-bottom:10px; margin:auto;">
           <div class="ui two column grid">
             <div class="column">
-              <h3 class="ui inverted center aligned icon header" style="margin-top:-10px; margin-bottom: 20px;">
+              <h3 class="ui inverted center aligned icon header" style="margin-top:-5px; margin-bottom:20px;">
                 <i class="big music icon"></i>
                 Choose a scale to improvise on
               </h3>
-
               <!-- KEY AND SCALE DROPDOWNS -->
-              <div class="ui inline" style="margin-bottom: 20px;">
+              <div class="ui inline" style="margin-bottom:10px;">
                 <label style="margin-right:8px">Key</label>
-                <select class="ui compact small search key landing dropdown">
-                  <option value="0">A</option>
-                  <option value="1">A#</option>
-                  <option value="2">B</option>
-                  <option value="3">C</option>
-                  <option value="4">C#</option>
-                  <option value="5">D</option>
-                  <option value="6">D#</option>
-                  <option value="7">E</option>
-                  <option value="8">F</option>
-                  <option value="9">F#</option>
-                  <option value="10">G</option>
-                  <option value="11">G#</option>
-                </select>
-                <label style="margin-left:18px; margin-right:8px">Scale / mode</label>
-                <select class="ui compact small select scale landing dropdown"></select>  
+                <select class="ui small key landing three column search dropdown">
+                  <option disabled value=" "></option>
+                  <option value="C">C</option>
+                  <option value="C#">C#</option>
+                  <option value="Db">Db</option>
+                  <option value="D">D</option>
+                  <option value="D#">D#</option>
+                  <option value="Eb">Eb</option>
+                  <option value="E">E</option>
+                  <option disabled value=" "></option>
+                  <option disabled value=" "></option>
+                  <option value="F">F</option>
+                  <option value="F#">F#</option>
+                  <option value="Gb">Gb</option>
+                  <option value="G">G</option>
+                  <option value="G#">G#</option>
+                  <option value="Ab">Ab</option>
+                  <option value="A">A</option>
+                  <option value="A#">A#</option>
+                  <option value="Bb">Bb</option>
+                  <option value="B">B</option>
+                </select>      
+              </div>
+
+              <div class="ui inline" style="margin-bottom:10px;">
+                <label style="margin-right:8px">Scale / mode</label>
+                <select class="ui small compact select scale landing dropdown" style="margin-bottom:10px;"></select>  
               </div>
               <p class="scale mode description"></p>
               <p style="font-size: medium; margin-bottom: 0px;">Scale notes in this key:</p>
@@ -109,7 +119,7 @@
             </div>
 
             <div class="column" style="padding-left:30px;">
-              <h3 class="ui inverted center aligned icon header" style="margin-top:-10px; margin-bottom: 30px;">
+              <h3 class="ui inverted center aligned icon header" style="margin-top:-5px; margin-bottom: 40px;">
                 <a href="https://www.youtube.com/" target="_blank" style="color:white"><i class="big youtube icon"></i></a><br>
                 Upload a song / backing track from youtube
               </h3>
@@ -163,9 +173,9 @@
       </div>   
 
       <!-- FOOTER -->
-      <div class="ui header centered" style="height: 10%;">
+      <div class="ui center aligned container" style="height: 5%;">
         <div class="footer">
-          <p2 style="color: white; font-size:small; vertical-align:9px; margin-right:-5px;">Powered &nbsp;&nbsp;by</p2>
+          <p2 style="color: white; vertical-align:10px; margin-right:-3px;">Powered &nbsp;by</p2>
           <a href="https://mtg.github.io/essentia.js" target="_blank">
             <img src="https://github.com/MTG/essentia.js/blob/master/src/assets/img/essentiajsbanner.png?raw=true"
               style="height: 27px;"/>
@@ -293,7 +303,7 @@
         </div>
 
         <div id="scaleNotes" class="ui centered container"
-          style="height:69px; display:flex; flex-direction:row; align-items: center; justify-content:space-between; width:45%;">
+          style="height:69px; width:50%; display:flex; flex-direction:row; align-items: center; justify-content:space-between;">
         </div>
 
         <!-- scale only mic button -->
@@ -390,9 +400,9 @@
         </div>
 
         <!-- FOOTER -->
-        <div class="ui header centered">
-          <div class="footer" style="margin-top: 30px;">
-            <p2 style="color: white; font-size:small; vertical-align:9px; margin-right:-5px;">Powered &nbsp;&nbsp;by</p2>
+        <div class="ui center aligned container" style="height: 5%;">
+          <div class="footer">
+            <p2 style="color: white; vertical-align:10px; margin-right:-3px;">Powered &nbsp;by</p2>
             <a href="https://mtg.github.io/essentia.js" target="_blank">
               <img src="https://github.com/MTG/essentia.js/blob/master/src/assets/img/essentiajsbanner.png?raw=true"
                 style="height: 27px;"/>
@@ -432,8 +442,30 @@
           <div class="middle aligned column" style="flex: 0 0 30px; padding:0px;">
             <p>Key</p>
           </div>
-          <div class="two wide column">
-            <select class="ui search key modal fluid dropdown">
+          <div class="four wide column">
+            <select class="ui key modal three column fluid search dropdown">
+              <option disabled value=" "></option>
+              <option value="C">C</option>
+              <option value="C#">C#</option>
+              <option value="Db">Db</option>
+              <option value="D">D</option>
+              <option value="D#">D#</option>
+              <option value="Eb">Eb</option>
+              <option value="E">E</option>
+              <option disabled value=" "></option>
+              <option disabled value=" "></option>
+              <option value="F">F</option>
+              <option value="F#">F#</option>
+              <option value="Gb">Gb</option>
+              <option value="G">G</option>
+              <option value="G#">G#</option>
+              <option value="Ab">Ab</option>
+              <option value="A">A</option>
+              <option value="A#">A#</option>
+              <option value="Bb">Bb</option>
+              <option value="B">B</option>
+            </select>      
+            <!-- <select class="ui search key modal fluid dropdown">
               <option value="0">A</option>
               <option value="1">A#</option>
               <option value="2">B</option>
@@ -446,7 +478,7 @@
               <option value="9">F#</option>
               <option value="10">G</option>
               <option value="11">G#</option>
-            </select>
+            </select> -->
           </div>
           <div class="two wide middle aligned column" style="padding:0px;">
             <p style="text-align: right;">Scale / mode</p>

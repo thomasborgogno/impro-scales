@@ -72,7 +72,7 @@ function stopMicRecordStream() {
   }
 }
 
-let noteBuffer = [];
+let noteIdBuffer = [];
 const noteBufferSize = 3;
 let silence = 0;
 const silenceThreshold = 20;
@@ -90,35 +90,35 @@ function onRecordFeatureExtractor(event) {
     if (silence) {
       silence = 0;
     }
-    const prevNote = mostFrequent(noteBuffer);
+    const prevNoteId = mostFrequent(noteIdBuffer);
 
     // compute hpcp for overlapping frames of audio
     const hpcp = essentiaExtractor.hpcpExtractor(audioBuffer);
 
     const scaledHPCP = hpcp.map(i => 100*Math.tanh(Math.pow(i*0.5, 2)));
     // console.log(`scaled: ${scaledHPCP}`);
-    noteBuffer.push( notes[indexOfMax(scaledHPCP)] );
+    noteIdBuffer.push( indexOfMax(scaledHPCP) );
 
-    if (noteBuffer.length === noteBufferSize) {
+    if (noteIdBuffer.length === noteBufferSize) {
 
-      const currNote = mostFrequent(noteBuffer);
+      const currNoteId = mostFrequent(noteIdBuffer);
 
-      if (currNote != prevNote) {
+      if (currNoteId != prevNoteId) {
         if (jQuery.isEmptyObject(session)) { // if there isn't a song loaded, print just the current note
-          printGenericNote(currNote);
+          printGenericNote(currNoteId);
         } else {
-          ++session.statsArray[notes.indexOf(currNote)];
-          if (session.scaleArray.includes(currNote)) {
-            printCorrectNote(currNote);
+          ++session.statsArray[currNoteId];
+          if (session.scaleIdArray.includes(currNoteId)) {
+            printCorrectNote(currNoteId);
           } else {
-            printOutOfScaleNote(currNote);
+            printOutOfScaleNote(currNoteId);
           }
         }
       }
-      noteBuffer.shift();
+      noteIdBuffer.shift();
 
-    } else while (noteBuffer.length >= noteBufferSize) {
-      noteBuffer.shift();
+    } else while (noteIdBuffer.length >= noteBufferSize) {
+      noteIdBuffer.shift();
     }
 
     // console.log(currentNote);
@@ -142,7 +142,7 @@ $('.red.mic').on('click', function(){
   let recording = $(this).hasClass("recording");
   if (!recording) {
 
-    noteBuffer = [];
+    noteIdBuffer = [];
     loadStats();
     // start microphone stream using getUserMedia
     startMicRecordStream(
