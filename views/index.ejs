@@ -6,7 +6,7 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/fomantic-ui@2.8.8/dist/semantic.min.css">
   </head>
 
-  <body style="background-color:  #000000!important;">
+  <body style="background-color:#000000!important;">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script> 
     <script src="https://cdn.jsdelivr.net/npm/fomantic-ui@2.8.8/dist/semantic.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia-wasm.web.js"></script>
@@ -17,7 +17,7 @@
     
 
     <!-- MENU -->
-    <div class="ui inverted menu" style="margin-top:15px;">
+    <div class="ui inverted menu">
       <div class="container">
         <div class="left item" style="position:unset;">
           <a href="/" style="color: white"><i class="guitar big icon" style="margin-left:20px; margin-right:10px;"></i></a>
@@ -47,7 +47,7 @@
     </div> <!-- END MENU -->
 
     <!-- LANDING PAGE BODY -->
-    <div id="landingPage" style="height:85%;">
+    <div id="landingPage" style="height:87%;">
       <!-- SAMPLE RATE ERROR -->
       <div class="ui inverted segment" id="sampleRateMsg" style="display:none; width:70%; margin:auto; background-color:black;">
         <div class="ui inverted medium warning message">
@@ -67,7 +67,7 @@
       </div>
 
       <!-- SCALE OR SONG LANDING SEGMENT -->
-      <div class="ui inverted center aligned segment" style="display:flex; align-items:center; height:60%; margin:0px; background-color:black;">
+      <div class="ui inverted center aligned segment" style="height:55%; display:flex; align-items:center; margin:0px; background-color:black;">
         
         <div class="ui inverted very padded placeholder segment" style="width: 85%; padding:30px; padding-bottom:10px; margin:auto;">
           <div class="ui two column grid">
@@ -153,7 +153,7 @@
       </div>
 
       <!-- local saved sessions -->
-      <div class="ui inverted center aligned storage segment" style="display:none; height:30%; margin:0px; display:flex; align-items:center; background-color:black;">
+      <div class="ui inverted center aligned storage segment" style="display:none; height:35%; margin:0px; display:flex; align-items:center; background-color:black;">
         <div class="ui inverted segment" style="width:50%; margin:auto;">
           <div class="ui inverted accordion">
             <div class="title active" style="font-size: medium; padding-top: 0px;">
@@ -178,7 +178,7 @@
       </div>   
 
       <!-- FOOTER -->
-      <div class="ui center aligned container" style="height: 5%;">
+      <div class="ui center aligned container" style="height: 10%;">
         <div class="footer">
           <p2 style="color: white; vertical-align:10px; margin-right:-3px;">Powered &nbsp;by</p2>
           <a href="https://mtg.github.io/essentia.js" target="_blank">
@@ -188,8 +188,6 @@
         </div>
       </div>
     </div>
-
-
 
     <!-- PAGE GRID BODY -->
     <div id="mainPage" class="ui grid" style="display: none; margin: 30px">
@@ -529,7 +527,7 @@
 
 <!-- Delete are u sure? MODAL -->
 <div id="deleteSessionModal" class="ui basic modal">
-  <div class="ui icon header"><i class="delete icon"></i>Do you want to delete this song?</div>
+  <div class="ui icon header"><i class="trash alternate outline icon" style="margin-bottom:20px;"></i>Do you want to delete this song?</div>
   <p id="modalDeleteSongName" style="text-align: center;"></p>
   <div class="actions">
     <div class="ui red basic cancel inverted button"><i class="remove icon"></i>No</div>
@@ -539,7 +537,7 @@
 
 <!-- Delete all are u sure? MODAL -->
 <div id="deleteAllSessionsModal" class="ui basic modal">
-  <div class="ui icon header"><i class="delete icon"></i>Do you want to delete all the analyzed songs?</div>
+  <div class="ui icon header"><i class="trash alternate outline icon" style="margin-bottom:20px;"></i>Do you want to delete all the analyzed songs?</div>
   <div class="actions">
     <div class="ui red basic cancel inverted button"><i class="remove icon"></i>No</div>
     <div class="ui green ok inverted button" id="modal_delete_all_songs_btn"><i class="checkmark icon"></i>Yes</div>
