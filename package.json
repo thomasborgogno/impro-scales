@@ -19,7 +19,7 @@
     "wavesurfer.js": "^5.2.0",
     "youtube-audio-stream": "^0.3.44",
     "youtube-dl-exec": "^2.0.2",
-    "ytdl-core": "^4.10.1"
+    "ytdl-core": "^4.11.0"
   },
   "overrides": {
     "graceful-fs": "^4.2.9"
